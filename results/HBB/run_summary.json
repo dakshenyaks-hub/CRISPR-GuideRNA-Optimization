@@ -1,0 +1,146 @@
+{
+  "gene": "HBB",
+  "timestamp": "2026-09-28T17:54:45.668354+00:00",
+  "ncbi_metadata": {
+    "accession": "NC_000011.10",
+    "assembly": "GRCh38",
+    "organism": "Homo sapiens",
+    "ncbi_gene_id": "3043",
+    "chromosome": "11",
+    "strand": "minus",
+    "gene_start": 5225464,
+    "gene_stop": 5227071,
+    "retrieved_start": 5223464,
+    "retrieved_stop": 5229071,
+    "sequence_length": 5608,
+    "fasta_path": "C:\\Users\\daksh\\Documents\\CRISPR-GuideRNA-Optimization\\data\\reference_sequences\\HBB_NC_000011_10.fasta"
+  },
+  "candidate_counts": {
+    "raw_candidates": 540,
+    "retained_candidates": 540,
+    "valid_20nt": 540,
+    "invalid_length": 0,
+    "duplicates": 0,
+    "plus_strand": 290,
+    "minus_strand": 250
+  },
+  "deep_spcas9_summary": {
+    "total_candidates": 540,
+    "successfully_predicted": 537,
+    "failed_edge_cases": 3,
+    "min": -3.896,
+    "max": 81.7955,
+    "mean": 37.3446,
+    "median": 38.7522,
+    "std": 18.7581
+  },
+  "files": {
+    "candidate_gRNAs_csv": "results\\HBB\\candidate_gRNAs.csv",
+    "gRNA_features_csv": "results\\HBB\\gRNA_features.csv",
+    "bowtie_index": "data\\hg38_index\\hg38_index",
+    "model_metadata_json": "results\\HBB\\model_metadata.json"
+  },
+  "feature_statistics": {
+    "gc_content": {
+      "min": 0.05,
+      "max": 0.8,
+      "mean": 0.4316,
+      "std": 0.1462,
+      "missing": 0
+    },
+    "melting_temp_c": {
+      "min": 32.74,
+      "max": 64.08,
+      "mean": 48.4022,
+      "std": 6.3108,
+      "missing": 0
+    },
+    "delta_g_kcal_mol": {
+      "min": -30.679,
+      "max": -15.781,
+      "mean": -23.0388,
+      "std": 2.9759,
+      "missing": 0
+    },
+    "folding_energy_kcal_mol": {
+      "min": -8.4,
+      "max": 0.0,
+      "mean": -1.065,
+      "std": 1.5468,
+      "missing": 0
+    },
+    "doench2016_proxy_score": {
+      "min": 0.365,
+      "max": 0.85,
+      "mean": 0.6317,
+      "std": 0.1115,
+      "missing": 0
+    },
+    "paired_fraction": {
+      "min": 0.0,
+      "max": 0.8,
+      "mean": 0.2128,
+      "std": 0.2287,
+      "missing": 0
+    },
+    "off_target_count": {
+      "min": 27.0,
+      "max": 999.0,
+      "mean": 506.3037,
+      "std": 327.1832,
+      "missing": 0
+    },
+    "mismatch_score": {
+      "min": 0.0,
+      "max": 3.0,
+      "mean": 2.7185,
+      "std": 0.6694,
+      "missing": 0
+    },
+    "off_targets_0mm": {
+      "min": 0.0,
+      "max": 999.0,
+      "mean": 42.7148,
+      "std": 193.1511,
+      "missing": 0
+    },
+    "off_targets_1mm": {
+      "min": 0.0,
+      "max": 997.0,
+      "mean": 31.5963,
+      "std": 148.4219,
+      "missing": 0
+    },
+    "off_targets_2mm": {
+      "min": 0.0,
+      "max": 866.0,
+      "mean": 61.4815,
+      "std": 143.4829,
+      "missing": 0
+    },
+    "off_targets_3mm": {
+      "min": 0.0,
+      "max": 951.0,
+      "mean": 370.5111,
+      "std": 266.8879,
+      "missing": 0
+    },
+    "deep_spcas9_score": {
+      "min": -3.896,
+      "max": 81.7955,
+      "mean": 37.3446,
+      "std": 18.7581,
+      "missing": 3
+    }
+  },
+  "missing_values": {
+    "deep_spcas9_score": 3
+  },
+  "software_versions": {
+    "biopython": "1.87",
+    "viennarna": "2.7.2",
+    "pandas": "3.0.5",
+    "numpy": "2.5.1",
+    "torch": "2.13.0+cpu"
+  }
+}

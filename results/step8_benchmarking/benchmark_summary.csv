@@ -1,0 +1,5 @@
+Gene,Feasible_Guides,Pareto_Guides,WeightedSum_Unique_Solutions,WeightedSum_Pareto_Coverage,HighestActivity_E_hat,HighestActivity_S_hat,LowestOT_E_hat,LowestOT_S_hat,EqualWeight_E_hat,EqualWeight_S_hat,ParetoSelected_E_hat,ParetoSelected_S_hat
+TP53,2791,9,3,22.2,1.0,0.846928,0.548217,1.0,1.0,0.846928,1.0,0.846928
+HBB,407,9,6,66.7,1.0,0.843621,0.460692,1.0,1.0,0.843621,1.0,0.843621
+EGFR,18169,12,6,41.7,1.0,0.786145,0.434821,1.0,0.965543,0.941767,0.965543,0.941767
+BRCA1,11733,7,5,71.4,1.0,0.0,0.816413,1.0,0.943864,0.958877,0.943864,0.958877

@@ -1,0 +1,5 @@
+Gene,Overall,Checks_Passed,Checks_Total
+TP53,PASS,13,13
+HBB,PASS,13,13
+EGFR,PASS,13,13
+BRCA1,PASS,13,13

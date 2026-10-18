@@ -1,0 +1,19 @@
+{
+  "gene_symbol": "RB1",
+  "organism": "Homo sapiens",
+  "ncbi_gene_id": "5925",
+  "chromosome": "13",
+  "genomic_accession": "NC_000013.11",
+  "assembly": "GRCh38",
+  "sequence_type": "genomic_DNA",
+  "strand": "plus",
+  "gene_start": 48303751,
+  "gene_stop": 48481890,
+  "retrieved_start": 48301751,
+  "retrieved_stop": 48483890,
+  "sequence_length": 182140,
+  "retrieval_timestamp": "2026-10-09T05:11:17.463290+00:00",
+  "fasta_path": "/mnt/c/Users/daksh/Documents/CRISPR-GuideRNA-Optimization/data/reference_sequences/RB1_NC_000013_11.fasta",
+  "selection_rule": "Retrieved genomic DNA from GRCh38 reference chromosome. Region includes gene body plus 2000 bp flanking on each side. Sequence is on the gene's native strand orientation.",
+  "notes": ""
+}

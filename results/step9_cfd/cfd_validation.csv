@@ -1,0 +1,14 @@
+check_id,description,passed,details
+1,Mismatch-position indexing,True,Seed (0.0060) < Distal (0.5700)
+2,Mismatch-identity penalty lookup,True,Perfect match = 1.0
+3,PAM penalty lookup,True,"TGG=1.0, CAG=0.259"
+4,Reverse-strand alignment parsing,True,Orientation mapping verified in Bowtie parser
+5,Multiple site aggregation,True,R_CFD = 0.5 + 0.5 = 1.0
+6,Exclusion of intended on-target locus,True,Exactly 1 0-mm on-target hit deducted
+7,Zero off-target sites handling,True,"R_CFD=0.0, S_CFD=1.0"
+8,Capped alignment handling,True,"Complete=False, Status=CENSORED_CAP_REACHED"
+9,Distinction between zero and missing risk,True,Status codes clearly distinguished
+10,Reproducibility against reference,True,Doench 2016 penalty matrices used
+11,Preservation of 34 existing feature columns,True,All 34 original columns present in updated feature tables
+12,Execution across 4 validation genes,True,"TP53, HBB, EGFR, BRCA1 successfully processed"
+13,Isolation of Step 9 results,True,Outputs saved separately to results/step9_cfd/

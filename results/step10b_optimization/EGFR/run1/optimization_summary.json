@@ -1,0 +1,228 @@
+{
+  "gene": "EGFR",
+  "run_label": "run1",
+  "timestamp": "2026-10-12T06:51:59.669882+00:00",
+  "join_audit": {
+    "gene": "EGFR",
+    "feature_file_rows": 23112,
+    "cfd_gene_rows_dedup": 23112,
+    "merged_rows": 23112,
+    "guides_with_cfd_data": 23112,
+    "guides_missing_cfd_data": 0,
+    "many_to_many_expansion": 0,
+    "join_ok": true
+  },
+  "feasibility_audit": {
+    "total_candidates": 23112,
+    "feasible_candidates": 16090,
+    "excluded_candidates": 7022,
+    "exclusion_breakdown": {
+      "nan_deep_spcas9_score": 2,
+      "gc_out_of_range": 2742,
+      "homopolymer_run_exceeded": 1861,
+      "poly_t_terminator": 1890,
+      "off_target_capped_excluded": 3912
+    },
+    "legacy_ot20_threshold_would_retain": 111,
+    "cfd_constraint_rationale": "Capped guides (OT=999) have cfd_scoring_status=CENSORED and cfd_off_target_risk=NaN. Excluded as scientifically conservative choice. Legacy raw OT<=20 NOT applied: CFD risk captures off-target quality for uncapped guides, making the raw count threshold redundant."
+  },
+  "pareto_analysis": {
+    "method": "epsilon-constraint (CFD specificity axis) + direct dominance",
+    "full_pareto_front_size": 8,
+    "verified_pareto_optimal_count": 8,
+    "weighted_sum_unique_solutions": 17
+  },
+  "objective_ranges_feasible": {
+    "activity_deep_spcas9": {
+      "min": -3.13783,
+      "max": 84.015671,
+      "mean": 45.109968,
+      "std": 16.379679
+    },
+    "norm_activity": {
+      "min": 0.0,
+      "max": 1.0,
+      "mean": 0.553596,
+      "std": 0.187941
+    },
+    "cfd_off_target_risk": {
+      "min": 0.0,
+      "max": 256.6963,
+      "mean": 14.01909,
+      "std": 11.991137
+    },
+    "cfd_specificity_score": {
+      "min": 0.280351,
+      "max": 1.0,
+      "mean": 0.884815,
+      "std": 0.076525
+    },
+    "norm_cfd_specificity": {
+      "min": 0.0,
+      "max": 1.0,
+      "mean": 0.839943,
+      "std": 0.106337
+    }
+  },
+  "selected_guides": [
+    {
+      "guide_id": "EGFR_100693_+",
+      "guide_rna": "GTGCAGAGTGCCCTCAACGA",
+      "deep_spcas9_score": 81.012604,
+      "norm_activity": 0.965543,
+      "cfd_off_target_risk": 0.5968,
+      "cfd_specificity_score": 0.994067,
+      "norm_cfd_specificity": 0.991756,
+      "balanced_score": 0.978649,
+      "gc_content": 0.6,
+      "off_target_count": 61,
+      "cfd_scoring_status": "COMPLETE"
+    },
+    {
+      "guide_id": "EGFR_90787_-",
+      "guide_rna": "TAGCTTGTGCCAGATAACGG",
+      "deep_spcas9_score": 77.101067,
+      "norm_activity": 0.920662,
+      "cfd_off_target_risk": 0.2957,
+      "cfd_specificity_score": 0.997052,
+      "norm_cfd_specificity": 0.995904,
+      "balanced_score": 0.958283,
+      "gc_content": 0.5,
+      "off_target_count": 68,
+      "cfd_scoring_status": "COMPLETE"
+    },
+    {
+      "guide_id": "EGFR_74407_+",
+      "guide_rna": "GTAACCAGCCAGGGAATGAG",
+      "deep_spcas9_score": 83.790947,
+      "norm_activity": 0.997422,
+      "cfd_off_target_risk": 6.6586,
+      "cfd_specificity_score": 0.937571,
+      "norm_cfd_specificity": 0.913251,
+      "balanced_score": 0.955336,
+      "gc_content": 0.55,
+      "off_target_count": 304,
+      "cfd_scoring_status": "COMPLETE"
+    },
+    {
+      "guide_id": "EGFR_27703_-",
+      "guide_rna": "TAGGACACACGAGTTATGCG",
+      "deep_spcas9_score": 76.219414,
+      "norm_activity": 0.910546,
+      "cfd_off_target_risk": 0.2873,
+      "cfd_specificity_score": 0.997135,
+      "norm_cfd_specificity": 0.996019,
+      "balanced_score": 0.953282,
+      "gc_content": 0.5,
+      "off_target_count": 10,
+      "cfd_scoring_status": "COMPLETE"
+    },
+    {
+      "guide_id": "EGFR_167075_+",
+      "guide_rna": "CGCATTCGCCGTGTGAACGG",
+      "deep_spcas9_score": 75.406868,
+      "norm_activity": 0.901223,
+      "cfd_off_target_risk": 0.0139,
+      "cfd_specificity_score": 0.999861,
+      "norm_cfd_specificity": 0.999807,
+      "balanced_score": 0.950515,
+      "gc_content": 0.65,
+      "off_target_count": 5,
+      "cfd_scoring_status": "COMPLETE"
+    }
+  ],
+  "n_selected": 5,
+  "lp_track_a": {
+    "status": "optimal",
+    "objective_value_maximised": 4.808892,
+    "weights_used": {
+      "w1_activity": 0.5,
+      "w2_cfd_specificity": 0.5
+    },
+    "n_variables": 16090,
+    "k": 5,
+    "note": "LP RELAXATION x_i in [0,1]. NOT the binary MIP x_i in {0,1}. Fractional solutions reported exactly, never rounded.",
+    "solution_summary": {
+      "fully_selected_x_approx_1": 4,
+      "fractional_0_lt_x_lt_1": 1,
+      "fully_rejected_x_approx_0": 16085
+    },
+    "kkt_analysis": {
+      "mu_cardinality_dual": 0.952915,
+      "stationarity_max_residual": 0.0,
+      "cs_alpha_max": 5.9e-09,
+      "cs_beta_max": 1.3e-09,
+      "kkt_satisfied": true
+    },
+    "top_lp_variables": [
+      {
+        "guide_id": "EGFR_173001_+",
+        "x_value": 1.0,
+        "norm_activity": 0.945268,
+        "norm_cfd_specificity": 0.981416
+      },
+      {
+        "guide_id": "EGFR_100693_+",
+        "x_value": 1.0,
+        "norm_activity": 0.965543,
+        "norm_cfd_specificity": 0.991756
+      },
+      {
+        "guide_id": "EGFR_90787_-",
+        "x_value": 1.0,
+        "norm_activity": 0.920662,
+        "norm_cfd_specificity": 0.995904
+      },
+      {
+        "guide_id": "EGFR_74407_+",
+        "x_value": 0.999999,
+        "norm_activity": 0.997422,
+        "norm_cfd_specificity": 0.913251
+      },
+      {
+        "guide_id": "EGFR_27703_-",
+        "x_value": 0.999999,
+        "norm_activity": 0.910546,
+        "norm_cfd_specificity": 0.996019
+      },
+      {
+        "guide_id": "EGFR_68668_+",
+        "x_value": 0.0,
+        "norm_activity": 0.927444,
+        "norm_cfd_specificity": 0.975567
+      },
+      {
+        "guide_id": "EGFR_39227_-",
+        "x_value": 0.0,
+        "norm_activity": 0.925135,
+        "norm_cfd_specificity": 0.976332
+      },
+      {
+        "guide_id": "EGFR_39906_+",
+        "x_value": 0.0,
+        "norm_activity": 0.959667,
+        "norm_cfd_specificity": 0.942436
+      },
+      {
+        "guide_id": "EGFR_111156_-",
+        "x_value": 0.0,
+        "norm_activity": 0.914076,
+        "norm_cfd_specificity": 0.985476
+      },
+      {
+        "guide_id": "EGFR_40326_+",
+        "x_value": 0.0,
+        "norm_activity": 0.923131,
+        "norm_cfd_specificity": 0.976069
+      }
+    ]
+  },
+  "output_files": {
+    "feasible_candidates": "C:\\Users\\daksh\\Documents\\CRISPR-GuideRNA-Optimization\\results\\step10b_optimization\\EGFR\\run1\\feasible_candidates.csv",
+    "excluded_candidates": "C:\\Users\\daksh\\Documents\\CRISPR-GuideRNA-Optimization\\results\\step10b_optimization\\EGFR\\run1\\excluded_candidates.csv",
+    "pareto_front": "C:\\Users\\daksh\\Documents\\CRISPR-GuideRNA-Optimization\\results\\step10b_optimization\\EGFR\\run1\\pareto_front.csv",
+    "weighted_sum": "C:\\Users\\daksh\\Documents\\CRISPR-GuideRNA-Optimization\\results\\step10b_optimization\\EGFR\\run1\\weighted_sum_approximation.csv",
+    "selected_guides": "C:\\Users\\daksh\\Documents\\CRISPR-GuideRNA-Optimization\\results\\step10b_optimization\\EGFR\\run1\\selected_guides.csv",
+    "pareto_plot": "C:\\Users\\daksh\\Documents\\CRISPR-GuideRNA-Optimization\\results\\step10b_optimization\\EGFR\\run1\\pareto_front.png"
+  }
+}

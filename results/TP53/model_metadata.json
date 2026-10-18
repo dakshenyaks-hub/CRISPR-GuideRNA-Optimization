@@ -1,0 +1,24 @@
+{
+  "model_name": "DeepSpCas9",
+  "paper": "Kim et al., Deep learning improves prediction of CRISPR-Cpf1 guide RNA activity, Nature Biotechnology 2018 / Science Advances 2019",
+  "source_repository": "https://github.com/MyungjaeSong/Paired-Library (branch DeepCRISPR.info)",
+  "pretrained_checkpoint": "PreTrain-Final-False-3-5-7-100-70-40-0.001-550-True-80-60",
+  "weights_file": "C:\\Users\\daksh\\Documents\\CRISPR-GuideRNA-Optimization\\models\\Paired-Library\\DeepCas9\\DeepCas9_weights.pt",
+  "framework": "PyTorch (converted from TensorFlow 1.x reference checkpoint)",
+  "input_length_bp": 30,
+  "input_format": "4 bp upstream + 20 bp guide + 3 bp PAM (NGG) + 3 bp downstream",
+  "nucleotide_encoding": "One-hot [A=(1,0,0,0), C=(0,1,0,0), G=(0,0,1,0), T=(0,0,0,1)] -> [N, 4, 1, 30]",
+  "output_interpretation": "Predicted on-target activity score (continuous indel frequency percentage from published high-throughput library)",
+  "inference_timestamp": "2026-08-31T17:23:16.783983+00:00",
+  "prediction_statistics": {
+    "total_candidates": 3554,
+    "successfully_predicted": 3553,
+    "failed_edge_cases": 1,
+    "min": -8.6266,
+    "max": 84.8229,
+    "mean": 40.0686,
+    "median": 42.4046,
+    "std": 18.5091
+  },
+  "pytorch_version": "2.6.0+cpu"
+}

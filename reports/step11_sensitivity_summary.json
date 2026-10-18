@@ -1,0 +1,799 @@
+{
+  "task": "Step 11 -- Sensitivity Analysis and Final Research Readiness Audit",
+  "timestamp": "2026-10-05T16:31:23.313431+00:00",
+  "primary_results_frozen": {
+    "TP53": {
+      "feasible": 1648,
+      "pareto": 8,
+      "selected_ids": [
+        "TP53_150_-",
+        "TP53_11911_-",
+        "TP53_559_-",
+        "TP53_2766_+",
+        "TP53_3053_-"
+      ],
+      "act_range": [
+        -0.189009,
+        84.822945
+      ],
+      "cfd_risk_range": [
+        0.0,
+        226.29
+      ],
+      "cfd_spec_range": [
+        0.306476,
+        1.0
+      ]
+    },
+    "HBB": {
+      "feasible": 365,
+      "pareto": 10,
+      "selected_ids": [
+        "HBB_1533_+",
+        "HBB_3541_+",
+        "HBB_1202_-",
+        "HBB_1861_-",
+        "HBB_2265_-"
+      ],
+      "act_range": [
+        0.799613,
+        81.795494
+      ],
+      "cfd_risk_range": [
+        0.5502,
+        71.2844
+      ],
+      "cfd_spec_range": [
+        0.583824,
+        0.994528
+      ]
+    },
+    "EGFR": {
+      "feasible": 16090,
+      "pareto": 8,
+      "selected_ids": [
+        "EGFR_100693_+",
+        "EGFR_90787_-",
+        "EGFR_74407_+",
+        "EGFR_27703_-",
+        "EGFR_167075_+"
+      ],
+      "act_range": [
+        -3.13783,
+        84.015671
+      ],
+      "cfd_risk_range": [
+        0.0,
+        256.6963
+      ],
+      "cfd_spec_range": [
+        0.280351,
+        1.0
+      ]
+    },
+    "BRCA1": {
+      "feasible": 5778,
+      "pareto": 10,
+      "selected_ids": [
+        "BRCA1_2088_+",
+        "BRCA1_2323_+",
+        "BRCA1_27410_-",
+        "BRCA1_122416_-",
+        "BRCA1_74210_+"
+      ],
+      "act_range": [
+        -6.800053,
+        82.355247
+      ],
+      "cfd_risk_range": [
+        0.0218,
+        456.9335
+      ],
+      "cfd_spec_range": [
+        0.179555,
+        0.999782
+      ]
+    }
+  },
+  "part4_objective_consistency": {
+    "identity_100_100_plus_R": {
+      "pass": true,
+      "max_residual": 4.999e-07,
+      "n_checked": 28685,
+      "formula": "cfd_specificity_score = 100 / (100 + cfd_off_target_risk)"
+    },
+    "monotone_direction_per_gene": {
+      "TP53": {
+        "pass": true,
+        "spearman_correlation_of_ranks": 1.0,
+        "interpretation": "1.0 means spec and risk rankings are perfectly inverse (monotone)"
+      },
+      "HBB": {
+        "pass": true,
+        "spearman_correlation_of_ranks": 1.0,
+        "interpretation": "1.0 means spec and risk rankings are perfectly inverse (monotone)"
+      },
+      "EGFR": {
+        "pass": true,
+        "spearman_correlation_of_ranks": 1.0,
+        "interpretation": "1.0 means spec and risk rankings are perfectly inverse (monotone)"
+      },
+      "BRCA1": {
+        "pass": true,
+        "spearman_correlation_of_ranks": 1.0,
+        "interpretation": "1.0 means spec and risk rankings are perfectly inverse (monotone)"
+      }
+    },
+    "monotone_direction_pass": true,
+    "normalization_directions": {
+      "norm_activity": "min-max(deep_spcas9_score), higher=better (maximize)",
+      "norm_cfd_specificity": "min-max(cfd_specificity_score), higher=better (maximize)",
+      "norm_ot_burden": "min-max(off_target_count), lower=better (NOT used in Pareto)",
+      "redundancy_check": "cfd_specificity_score NOT simultaneously optimized with cfd_off_target_risk",
+      "pass": true
+    },
+    "normalization_range_check_TP53": {
+      "pass": true,
+      "norm_activity_in_0_1": true,
+      "norm_cfd_specificity_in_0_1": true
+    },
+    "all_passed": true
+  },
+  "part2_censored_sensitivity": {
+    "run1": {
+      "TP53": {
+        "gene": "TP53",
+        "run_label": "run1",
+        "scenario": "CENSORED-WORST-CASE SENSITIVITY",
+        "imputation": {
+          "gene_specific_max_observed_cfd_risk": 226.29,
+          "imputed_cfd_specificity": 0.30647583,
+          "formula": "cfd_specificity = 100/(100+max_risk)",
+          "n_guides_imputed": 1589,
+          "note": "This is NOT the true CFD risk. It is a conservative upper-bound sensitivity scenario only. The primary dataset is unmodified."
+        },
+        "feasibility": {
+          "total": 3554,
+          "feasible": 2791,
+          "excluded": 763
+        },
+        "pareto": {
+          "full_pareto_size": 8,
+          "verified_pareto_count": 8
+        },
+        "objective_ranges": {
+          "activity_deep_spcas9": {
+            "min": -0.189009,
+            "max": 84.822945,
+            "mean": 44.790677,
+            "std": 15.296206
+          },
+          "cfd_off_target_risk": {
+            "min": 0.0,
+            "max": 226.29,
+            "mean": 100.645256,
+            "std": 105.184678
+          },
+          "cfd_specificity_score": {
+            "min": 0.306476,
+            "max": 1.0,
+            "mean": 0.651135,
+            "std": 0.293646
+          }
+        },
+        "selected_guide_ids": [
+          "TP53_150_-",
+          "TP53_11911_-",
+          "TP53_559_-",
+          "TP53_2766_+",
+          "TP53_3053_-"
+        ],
+        "primary_selected_ids": [
+          "TP53_150_-",
+          "TP53_11911_-",
+          "TP53_559_-",
+          "TP53_2766_+",
+          "TP53_3053_-"
+        ],
+        "overlap_with_primary": [
+          "TP53_11911_-",
+          "TP53_150_-",
+          "TP53_2766_+",
+          "TP53_3053_-",
+          "TP53_559_-"
+        ],
+        "overlap_pct": 100.0,
+        "output_dir": "C:\\Users\\daksh\\Documents\\CRISPR-GuideRNA-Optimization\\results\\step11_sensitivity\\censored_worst_case\\TP53\\run1"
+      },
+      "HBB": {
+        "gene": "HBB",
+        "run_label": "run1",
+        "scenario": "CENSORED-WORST-CASE SENSITIVITY",
+        "imputation": {
+          "gene_specific_max_observed_cfd_risk": 71.2844,
+          "imputed_cfd_specificity": 0.58382433,
+          "formula": "cfd_specificity = 100/(100+max_risk)",
+          "n_guides_imputed": 124,
+          "note": "This is NOT the true CFD risk. It is a conservative upper-bound sensitivity scenario only. The primary dataset is unmodified."
+        },
+        "feasibility": {
+          "total": 540,
+          "feasible": 407,
+          "excluded": 133
+        },
+        "pareto": {
+          "full_pareto_size": 10,
+          "verified_pareto_count": 10
+        },
+        "objective_ranges": {
+          "activity_deep_spcas9": {
+            "min": 0.799613,
+            "max": 81.795494,
+            "mean": 42.213231,
+            "std": 16.144714
+          },
+          "cfd_off_target_risk": {
+            "min": 0.5502,
+            "max": 71.2844,
+            "mean": 19.770882,
+            "std": 19.920123
+          },
+          "cfd_specificity_score": {
+            "min": 0.583824,
+            "max": 0.994528,
+            "mean": 0.853526,
+            "std": 0.113348
+          }
+        },
+        "selected_guide_ids": [
+          "HBB_1533_+",
+          "HBB_3541_+",
+          "HBB_1202_-",
+          "HBB_1861_-",
+          "HBB_2265_-"
+        ],
+        "primary_selected_ids": [
+          "HBB_1533_+",
+          "HBB_3541_+",
+          "HBB_1202_-",
+          "HBB_1861_-",
+          "HBB_2265_-"
+        ],
+        "overlap_with_primary": [
+          "HBB_1202_-",
+          "HBB_1533_+",
+          "HBB_1861_-",
+          "HBB_2265_-",
+          "HBB_3541_+"
+        ],
+        "overlap_pct": 100.0,
+        "output_dir": "C:\\Users\\daksh\\Documents\\CRISPR-GuideRNA-Optimization\\results\\step11_sensitivity\\censored_worst_case\\HBB\\run1"
+      },
+      "EGFR": {
+        "gene": "EGFR",
+        "run_label": "run1",
+        "scenario": "CENSORED-WORST-CASE SENSITIVITY",
+        "imputation": {
+          "gene_specific_max_observed_cfd_risk": 256.6963,
+          "imputed_cfd_specificity": 0.28035054,
+          "formula": "cfd_specificity = 100/(100+max_risk)",
+          "n_guides_imputed": 3912,
+          "note": "This is NOT the true CFD risk. It is a conservative upper-bound sensitivity scenario only. The primary dataset is unmodified."
+        },
+        "feasibility": {
+          "total": 23112,
+          "feasible": 18169,
+          "excluded": 4943
+        },
+        "pareto": {
+          "full_pareto_size": 8,
+          "verified_pareto_count": 8
+        },
+        "objective_ranges": {
+          "activity_deep_spcas9": {
+            "min": -3.13783,
+            "max": 84.015671,
+            "mean": 45.006277,
+            "std": 16.420339
+          },
+          "cfd_off_target_risk": {
+            "min": 0.0,
+            "max": 256.6963,
+            "mean": 41.787593,
+            "std": 78.072754
+          },
+          "cfd_specificity_score": {
+            "min": 0.280351,
+            "max": 1.0,
+            "mean": 0.815649,
+            "std": 0.205457
+          }
+        },
+        "selected_guide_ids": [
+          "EGFR_100693_+",
+          "EGFR_90787_-",
+          "EGFR_74407_+",
+          "EGFR_27703_-",
+          "EGFR_167075_+"
+        ],
+        "primary_selected_ids": [
+          "EGFR_100693_+",
+          "EGFR_90787_-",
+          "EGFR_74407_+",
+          "EGFR_27703_-",
+          "EGFR_167075_+"
+        ],
+        "overlap_with_primary": [
+          "EGFR_100693_+",
+          "EGFR_167075_+",
+          "EGFR_27703_-",
+          "EGFR_74407_+",
+          "EGFR_90787_-"
+        ],
+        "overlap_pct": 100.0,
+        "output_dir": "C:\\Users\\daksh\\Documents\\CRISPR-GuideRNA-Optimization\\results\\step11_sensitivity\\censored_worst_case\\EGFR\\run1"
+      },
+      "BRCA1": {
+        "gene": "BRCA1",
+        "run_label": "run1",
+        "scenario": "CENSORED-WORST-CASE SENSITIVITY",
+        "imputation": {
+          "gene_specific_max_observed_cfd_risk": 456.9335,
+          "imputed_cfd_specificity": 0.17955465,
+          "formula": "cfd_specificity = 100/(100+max_risk)",
+          "n_guides_imputed": 8423,
+          "note": "This is NOT the true CFD risk. It is a conservative upper-bound sensitivity scenario only. The primary dataset is unmodified."
+        },
+        "feasibility": {
+          "total": 15527,
+          "feasible": 11733,
+          "excluded": 3794
+        },
+        "pareto": {
+          "full_pareto_size": 11,
+          "verified_pareto_count": 11
+        },
+        "objective_ranges": {
+          "activity_deep_spcas9": {
+            "min": -6.800053,
+            "max": 83.272591,
+            "mean": 43.374966,
+            "std": 15.92174
+          },
+          "cfd_off_target_risk": {
+            "min": 0.0218,
+            "max": 456.9335,
+            "mean": 242.039836,
+            "std": 218.94084
+          },
+          "cfd_specificity_score": {
+            "min": 0.179555,
+            "max": 0.999782,
+            "mean": 0.510794,
+            "std": 0.3457
+          }
+        },
+        "selected_guide_ids": [
+          "BRCA1_2088_+",
+          "BRCA1_2323_+",
+          "BRCA1_27410_-",
+          "BRCA1_122416_-",
+          "BRCA1_74210_+"
+        ],
+        "primary_selected_ids": [
+          "BRCA1_2088_+",
+          "BRCA1_2323_+",
+          "BRCA1_27410_-",
+          "BRCA1_122416_-",
+          "BRCA1_74210_+"
+        ],
+        "overlap_with_primary": [
+          "BRCA1_122416_-",
+          "BRCA1_2088_+",
+          "BRCA1_2323_+",
+          "BRCA1_27410_-",
+          "BRCA1_74210_+"
+        ],
+        "overlap_pct": 100.0,
+        "output_dir": "C:\\Users\\daksh\\Documents\\CRISPR-GuideRNA-Optimization\\results\\step11_sensitivity\\censored_worst_case\\BRCA1\\run1"
+      }
+    },
+    "reproducibility": {
+      "label": "censored_worst_case",
+      "all_passed": true,
+      "per_gene": {
+        "TP53": {
+          "pass": true,
+          "feasible_match": true,
+          "pareto_size_match": true,
+          "selected_ids_match": true
+        },
+        "HBB": {
+          "pass": true,
+          "feasible_match": true,
+          "pareto_size_match": true,
+          "selected_ids_match": true
+        },
+        "EGFR": {
+          "pass": true,
+          "feasible_match": true,
+          "pareto_size_match": true,
+          "selected_ids_match": true
+        },
+        "BRCA1": {
+          "pass": true,
+          "feasible_match": true,
+          "pareto_size_match": true,
+          "selected_ids_match": true
+        }
+      }
+    }
+  },
+  "part3_epsilon_resolution": {
+    "TP53": {
+      "gene": "TP53",
+      "per_step_count": {
+        "50": {
+          "n_epsilon_steps": 50,
+          "full_pareto_size": 8,
+          "verified_pareto_count": 8,
+          "selected_guide_ids": [
+            "TP53_150_-",
+            "TP53_11911_-",
+            "TP53_559_-",
+            "TP53_2766_+",
+            "TP53_3053_-"
+          ],
+          "overlap_with_primary_50step": [
+            "TP53_11911_-",
+            "TP53_150_-",
+            "TP53_2766_+",
+            "TP53_3053_-",
+            "TP53_559_-"
+          ],
+          "overlap_pct": 100.0
+        },
+        "100": {
+          "n_epsilon_steps": 100,
+          "full_pareto_size": 8,
+          "verified_pareto_count": 8,
+          "selected_guide_ids": [
+            "TP53_150_-",
+            "TP53_11911_-",
+            "TP53_559_-",
+            "TP53_2766_+",
+            "TP53_3053_-"
+          ],
+          "overlap_with_primary_50step": [
+            "TP53_11911_-",
+            "TP53_150_-",
+            "TP53_2766_+",
+            "TP53_3053_-",
+            "TP53_559_-"
+          ],
+          "overlap_pct": 100.0
+        },
+        "200": {
+          "n_epsilon_steps": 200,
+          "full_pareto_size": 8,
+          "verified_pareto_count": 8,
+          "selected_guide_ids": [
+            "TP53_150_-",
+            "TP53_11911_-",
+            "TP53_559_-",
+            "TP53_2766_+",
+            "TP53_3053_-"
+          ],
+          "overlap_with_primary_50step": [
+            "TP53_11911_-",
+            "TP53_150_-",
+            "TP53_2766_+",
+            "TP53_3053_-",
+            "TP53_559_-"
+          ],
+          "overlap_pct": 100.0
+        }
+      },
+      "resolution_stable": true,
+      "selection_stable_50_to_200": true,
+      "pareto_size_change_50_to_200": 0,
+      "note": "If pareto_size_change is 0 and selection is stable, 50-step resolution appears sufficient for this dataset."
+    },
+    "HBB": {
+      "gene": "HBB",
+      "per_step_count": {
+        "50": {
+          "n_epsilon_steps": 50,
+          "full_pareto_size": 10,
+          "verified_pareto_count": 10,
+          "selected_guide_ids": [
+            "HBB_1533_+",
+            "HBB_3541_+",
+            "HBB_1202_-",
+            "HBB_1861_-",
+            "HBB_2265_-"
+          ],
+          "overlap_with_primary_50step": [
+            "HBB_1202_-",
+            "HBB_1533_+",
+            "HBB_1861_-",
+            "HBB_2265_-",
+            "HBB_3541_+"
+          ],
+          "overlap_pct": 100.0
+        },
+        "100": {
+          "n_epsilon_steps": 100,
+          "full_pareto_size": 10,
+          "verified_pareto_count": 10,
+          "selected_guide_ids": [
+            "HBB_1533_+",
+            "HBB_3541_+",
+            "HBB_1202_-",
+            "HBB_1861_-",
+            "HBB_2265_-"
+          ],
+          "overlap_with_primary_50step": [
+            "HBB_1202_-",
+            "HBB_1533_+",
+            "HBB_1861_-",
+            "HBB_2265_-",
+            "HBB_3541_+"
+          ],
+          "overlap_pct": 100.0
+        },
+        "200": {
+          "n_epsilon_steps": 200,
+          "full_pareto_size": 10,
+          "verified_pareto_count": 10,
+          "selected_guide_ids": [
+            "HBB_1533_+",
+            "HBB_3541_+",
+            "HBB_1202_-",
+            "HBB_1861_-",
+            "HBB_2265_-"
+          ],
+          "overlap_with_primary_50step": [
+            "HBB_1202_-",
+            "HBB_1533_+",
+            "HBB_1861_-",
+            "HBB_2265_-",
+            "HBB_3541_+"
+          ],
+          "overlap_pct": 100.0
+        }
+      },
+      "resolution_stable": true,
+      "selection_stable_50_to_200": true,
+      "pareto_size_change_50_to_200": 0,
+      "note": "If pareto_size_change is 0 and selection is stable, 50-step resolution appears sufficient for this dataset."
+    },
+    "EGFR": {
+      "gene": "EGFR",
+      "per_step_count": {
+        "50": {
+          "n_epsilon_steps": 50,
+          "full_pareto_size": 8,
+          "verified_pareto_count": 8,
+          "selected_guide_ids": [
+            "EGFR_100693_+",
+            "EGFR_90787_-",
+            "EGFR_74407_+",
+            "EGFR_27703_-",
+            "EGFR_167075_+"
+          ],
+          "overlap_with_primary_50step": [
+            "EGFR_100693_+",
+            "EGFR_167075_+",
+            "EGFR_27703_-",
+            "EGFR_74407_+",
+            "EGFR_90787_-"
+          ],
+          "overlap_pct": 100.0
+        },
+        "100": {
+          "n_epsilon_steps": 100,
+          "full_pareto_size": 8,
+          "verified_pareto_count": 8,
+          "selected_guide_ids": [
+            "EGFR_100693_+",
+            "EGFR_90787_-",
+            "EGFR_74407_+",
+            "EGFR_27703_-",
+            "EGFR_167075_+"
+          ],
+          "overlap_with_primary_50step": [
+            "EGFR_100693_+",
+            "EGFR_167075_+",
+            "EGFR_27703_-",
+            "EGFR_74407_+",
+            "EGFR_90787_-"
+          ],
+          "overlap_pct": 100.0
+        },
+        "200": {
+          "n_epsilon_steps": 200,
+          "full_pareto_size": 8,
+          "verified_pareto_count": 8,
+          "selected_guide_ids": [
+            "EGFR_100693_+",
+            "EGFR_90787_-",
+            "EGFR_74407_+",
+            "EGFR_27703_-",
+            "EGFR_167075_+"
+          ],
+          "overlap_with_primary_50step": [
+            "EGFR_100693_+",
+            "EGFR_167075_+",
+            "EGFR_27703_-",
+            "EGFR_74407_+",
+            "EGFR_90787_-"
+          ],
+          "overlap_pct": 100.0
+        }
+      },
+      "resolution_stable": true,
+      "selection_stable_50_to_200": true,
+      "pareto_size_change_50_to_200": 0,
+      "note": "If pareto_size_change is 0 and selection is stable, 50-step resolution appears sufficient for this dataset."
+    },
+    "BRCA1": {
+      "gene": "BRCA1",
+      "per_step_count": {
+        "50": {
+          "n_epsilon_steps": 50,
+          "full_pareto_size": 10,
+          "verified_pareto_count": 10,
+          "selected_guide_ids": [
+            "BRCA1_2088_+",
+            "BRCA1_2323_+",
+            "BRCA1_27410_-",
+            "BRCA1_122416_-",
+            "BRCA1_74210_+"
+          ],
+          "overlap_with_primary_50step": [
+            "BRCA1_122416_-",
+            "BRCA1_2088_+",
+            "BRCA1_2323_+",
+            "BRCA1_27410_-",
+            "BRCA1_74210_+"
+          ],
+          "overlap_pct": 100.0
+        },
+        "100": {
+          "n_epsilon_steps": 100,
+          "full_pareto_size": 10,
+          "verified_pareto_count": 10,
+          "selected_guide_ids": [
+            "BRCA1_2088_+",
+            "BRCA1_2323_+",
+            "BRCA1_27410_-",
+            "BRCA1_122416_-",
+            "BRCA1_74210_+"
+          ],
+          "overlap_with_primary_50step": [
+            "BRCA1_122416_-",
+            "BRCA1_2088_+",
+            "BRCA1_2323_+",
+            "BRCA1_27410_-",
+            "BRCA1_74210_+"
+          ],
+          "overlap_pct": 100.0
+        },
+        "200": {
+          "n_epsilon_steps": 200,
+          "full_pareto_size": 10,
+          "verified_pareto_count": 10,
+          "selected_guide_ids": [
+            "BRCA1_2088_+",
+            "BRCA1_2323_+",
+            "BRCA1_27410_-",
+            "BRCA1_122416_-",
+            "BRCA1_74210_+"
+          ],
+          "overlap_with_primary_50step": [
+            "BRCA1_122416_-",
+            "BRCA1_2088_+",
+            "BRCA1_2323_+",
+            "BRCA1_27410_-",
+            "BRCA1_74210_+"
+          ],
+          "overlap_pct": 100.0
+        }
+      },
+      "resolution_stable": true,
+      "selection_stable_50_to_200": true,
+      "pareto_size_change_50_to_200": 0,
+      "note": "If pareto_size_change is 0 and selection is stable, 50-step resolution appears sufficient for this dataset."
+    }
+  },
+  "part5_cross_gene_interpretation": {
+    "TP53": {
+      "primary_feasible": 1648,
+      "primary_pareto_size": 8,
+      "sensitivity_feasible": 2791,
+      "sensitivity_pareto_size": 8,
+      "sensitivity_overlap_with_primary_pct": 100.0,
+      "epsilon_resolution_stable": true,
+      "selection_stable_50_to_200": true,
+      "pareto_size_change_50_to_200": 0,
+      "gene_specific_notes": "50-step epsilon resolution appears sufficient (200-step produces same Pareto and selection). | High overlap (100.0%) between primary and worst-case sensitivity selected guides."
+    },
+    "HBB": {
+      "primary_feasible": 365,
+      "primary_pareto_size": 10,
+      "sensitivity_feasible": 407,
+      "sensitivity_pareto_size": 10,
+      "sensitivity_overlap_with_primary_pct": 100.0,
+      "epsilon_resolution_stable": true,
+      "selection_stable_50_to_200": true,
+      "pareto_size_change_50_to_200": 0,
+      "gene_specific_notes": "Legacy OT<=20 threshold would have produced an empty feasible set (0 guides). CFD-aware approach retains 365 feasible guides. HBB has the most compressed cfd_specificity_score range (0.58-0.99). | 50-step epsilon resolution appears sufficient (200-step produces same Pareto and selection). | High overlap (100.0%) between primary and worst-case sensitivity selected guides."
+    },
+    "EGFR": {
+      "primary_feasible": 16090,
+      "primary_pareto_size": 8,
+      "sensitivity_feasible": 18169,
+      "sensitivity_pareto_size": 8,
+      "sensitivity_overlap_with_primary_pct": 100.0,
+      "epsilon_resolution_stable": true,
+      "selection_stable_50_to_200": true,
+      "pareto_size_change_50_to_200": 0,
+      "gene_specific_notes": "50-step epsilon resolution appears sufficient (200-step produces same Pareto and selection). | High overlap (100.0%) between primary and worst-case sensitivity selected guides."
+    },
+    "BRCA1": {
+      "primary_feasible": 5778,
+      "primary_pareto_size": 10,
+      "sensitivity_feasible": 11733,
+      "sensitivity_pareto_size": 11,
+      "sensitivity_overlap_with_primary_pct": 100.0,
+      "epsilon_resolution_stable": true,
+      "selection_stable_50_to_200": true,
+      "pareto_size_change_50_to_200": 0,
+      "gene_specific_notes": "BRCA1 has the highest censored fraction (~54% of all candidates). Worst-case sensitivity imputes max_risk=456.9335 to 8423 additional guides. Conclusions for BRCA1 are most sensitive to censoring assumptions. | 50-step epsilon resolution appears sufficient (200-step produces same Pareto and selection). | High overlap (100.0%) between primary and worst-case sensitivity selected guides."
+    }
+  },
+  "part8_scientific_questions": {
+    "Q1_activity_vs_specificity_tradeoff_consistent": true,
+    "Q1_evidence": "All 4 genes show clear activity-specificity trade-off in Pareto fronts (8-10 non-dominated guides each)",
+    "Q2_selected_guides_stable_under_sensitivity": true,
+    "Q2_evidence": {
+      "TP53": 100.0,
+      "HBB": 100.0,
+      "EGFR": 100.0,
+      "BRCA1": 100.0
+    },
+    "Q3_censoring_substantially_alters_conclusions": false,
+    "Q3_note": "BRCA1 has 54% censored guides; sensitivity analysis impact is gene-dependent",
+    "Q4_epsilon_resolution_materially_changes_pareto": false,
+    "Q5_mathematical_claims_correct": {
+      "track_a_lp_is_convex": true,
+      "track_a_note": "LP relaxation x_i in [0,1], linear objective, affine constraints -> convex",
+      "track_b_pareto_is_not_convex": true,
+      "track_b_note": "Binary integer problem x_i in {0,1} -> NOT convex in general",
+      "pareto_dominance_direction_correct": true,
+      "pareto_dominance_note": "Both objectives (activity, cfd_specificity) are maximized; dominance correctly checks both"
+    }
+  },
+  "scientific_interpretation": {
+    "method": "All results described as computationally Pareto-optimal under the specified model.",
+    "NOT_biological_optimality": true,
+    "objective_types": {
+      "deep_spcas9_score": "ML computational prediction (DeepSpCas9)",
+      "cfd_specificity_score": "Computational CFD model score",
+      "cfd_off_target_risk": "Computational CFD model risk sum",
+      "optimization_result": "Mathematical optimization under specified objectives",
+      "experimental_validation": "NOT performed in this project"
+    }
+  },
+  "limitations": [
+    "Censored-guide sensitivity uses gene-specific maximum observed CFD risk as a worst-case imputation. True risks are unknown.",
+    "Epsilon-constraint resolution was tested at 50/100/200 steps; very fine-grained sensitivity not explored.",
+    "Normalization is gene-specific -- normalized scores NOT comparable across genes.",
+    "DeepSpCas9 activity is a computational ML prediction, NOT experimental Cas9 efficiency.",
+    "CFD scoring is a computational model, NOT experimental off-target data.",
+    "No wet-lab validation has been performed.",
+    "LP Track A may return fractional x_i values; reported exactly, never rounded."
+  ],
+  "final_status": "READY FOR FINAL RESEARCH PRESENTATION"
+}

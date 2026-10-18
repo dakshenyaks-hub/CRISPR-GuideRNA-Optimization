@@ -1,0 +1,19 @@
+{
+  "gene_symbol": "HBB",
+  "organism": "Homo sapiens",
+  "ncbi_gene_id": "3043",
+  "chromosome": "11",
+  "genomic_accession": "NC_000011.10",
+  "assembly": "GRCh38",
+  "sequence_type": "genomic_DNA",
+  "strand": "minus",
+  "gene_start": 5225464,
+  "gene_stop": 5227071,
+  "retrieved_start": 5223464,
+  "retrieved_stop": 5229071,
+  "sequence_length": 5608,
+  "retrieval_timestamp": "2026-09-28T17:52:42.846404+00:00",
+  "fasta_path": "C:\\Users\\daksh\\Documents\\CRISPR-GuideRNA-Optimization\\data\\reference_sequences\\HBB_NC_000011_10.fasta",
+  "selection_rule": "Retrieved genomic DNA from GRCh38 reference chromosome. Region includes gene body plus 2000 bp flanking on each side. Sequence is on the gene's native strand orientation.",
+  "notes": ""
+}

@@ -1,0 +1,19 @@
+{
+  "gene_symbol": "EGFR",
+  "organism": "Homo sapiens",
+  "ncbi_gene_id": "1956",
+  "chromosome": "7",
+  "genomic_accession": "NC_000007.14",
+  "assembly": "GRCh38",
+  "sequence_type": "genomic_DNA",
+  "strand": "plus",
+  "gene_start": 55019017,
+  "gene_stop": 55211628,
+  "retrieved_start": 55017017,
+  "retrieved_stop": 55213628,
+  "sequence_length": 196612,
+  "retrieval_timestamp": "2026-09-28T17:55:59.153114+00:00",
+  "fasta_path": "C:\\Users\\daksh\\Documents\\CRISPR-GuideRNA-Optimization\\data\\reference_sequences\\EGFR_NC_000007_14.fasta",
+  "selection_rule": "Retrieved genomic DNA from GRCh38 reference chromosome. Region includes gene body plus 2000 bp flanking on each side. Sequence is on the gene's native strand orientation.",
+  "notes": ""
+}

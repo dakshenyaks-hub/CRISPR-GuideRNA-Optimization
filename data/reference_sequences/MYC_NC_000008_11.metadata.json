@@ -1,0 +1,19 @@
+{
+  "gene_symbol": "MYC",
+  "organism": "Homo sapiens",
+  "ncbi_gene_id": "4609",
+  "chromosome": "8",
+  "genomic_accession": "NC_000008.11",
+  "assembly": "GRCh38",
+  "sequence_type": "genomic_DNA",
+  "strand": "plus",
+  "gene_start": 127735434,
+  "gene_stop": 127742951,
+  "retrieved_start": 127733434,
+  "retrieved_stop": 127744951,
+  "sequence_length": 11518,
+  "retrieval_timestamp": "2026-10-08T14:39:48.629241+00:00",
+  "fasta_path": "/mnt/c/Users/daksh/Documents/CRISPR-GuideRNA-Optimization/data/reference_sequences/MYC_NC_000008_11.fasta",
+  "selection_rule": "Retrieved genomic DNA from GRCh38 reference chromosome. Region includes gene body plus 2000 bp flanking on each side. Sequence is on the gene's native strand orientation.",
+  "notes": ""
+}

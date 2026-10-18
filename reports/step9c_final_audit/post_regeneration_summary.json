@@ -1,0 +1,50 @@
+{
+  "timestamp": "2026-09-30T10:44:00+05:30",
+  "source_dataset": "results/step9_cfd_corrected/cfd_guide_features.csv",
+  "regenerated_dataset": "results/step9_cfd_final/cfd_guide_features.csv",
+  "total_guides": 59361,
+  "unique_grna_sequences": 42733,
+  "comparison": {
+    "complete_searches": {
+      "old": 39380,
+      "new": 29299,
+      "pct": 49.36
+    },
+    "incomplete_searches": {
+      "old": 19981,
+      "new": 30062,
+      "pct": 50.64
+    },
+    "capped_searches_total": 30062,
+    "misclassified_capped_marked_complete": {
+      "old": 10081,
+      "new": 0
+    },
+    "capped_searches_with_nan_risk": {
+      "old": 19981,
+      "new": 30062
+    },
+    "exclusion_methods": {
+      "old": {
+        "FIRST_ZEROMM_FALLBACK": 59361
+      },
+      "new": {
+        "UNRESOLVED": 59361,
+        "FIRST_ZEROMM_FALLBACK": 0
+      }
+    }
+  },
+  "test_execution": {
+    "test_runner": "tests/run_all_tests.py",
+    "unit_tests_passed": 12,
+    "e2e_tests_passed": 2,
+    "total_passed": 14,
+    "failed": 0
+  },
+  "downstream_optimization_readiness": {
+    "eligible_guides_uncapped_complete": 29299,
+    "excluded_capped_guides": 30062,
+    "nan_handling": "Capped guides explicitly excluded by off_target_capped == False condition in convex optimization",
+    "status": "READY FOR DOWNSTREAM OPTIMIZATION"
+  }
+}

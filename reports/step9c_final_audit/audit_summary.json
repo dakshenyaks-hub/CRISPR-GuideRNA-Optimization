@@ -1,0 +1,44 @@
+{
+  "audit_timestamp": "2026-09-30T09:43:00+05:30",
+  "dataset_inspected": "results/step9_cfd_corrected/cfd_guide_features.csv",
+  "total_guides": 59361,
+  "unique_guides": 59361,
+  "duplicate_ids": 0,
+  "missing_values": {
+    "deep_spcas9_score": 7,
+    "cfd_off_target_risk": 19981,
+    "cfd_specificity_score": 19981
+  },
+  "searches": {
+    "complete": 39380,
+    "complete_pct": 66.34,
+    "incomplete": 19981,
+    "incomplete_pct": 33.66,
+    "bowtie_capped_step8": 30062,
+    "status_counts": {
+      "COMPLETE": 39380,
+      "CENSORED_CAP_REACHED": 19981
+    }
+  },
+  "pam_integrity": {
+    "guides_with_incomplete_pam": 22070,
+    "total_incomplete_pam_sites_skipped": 14910696
+  },
+  "target_exclusion": {
+    "methods": {
+      "FIRST_ZEROMM_FALLBACK": 59361
+    }
+  },
+  "inconsistencies": [
+    "10,081 guides capped at 1,000 Bowtie hits in Step 8 were misclassified as COMPLETE in existing CSV",
+    "All 59,361 guides in existing CSV used unsafe FIRST_ZEROMM_FALLBACK before code patch",
+    "19,981 guides have NaN primary risk/specificity scores which would cause unhandled NaNs in optimization"
+  ],
+  "test_suite_status": {
+    "unit_tests_passed": 12,
+    "e2e_tests_passed": 2,
+    "total_tests_passed": 14,
+    "test_runner": "tests/run_all_tests.py"
+  },
+  "final_status": "READY AFTER SPECIFIC FIXES"
+}

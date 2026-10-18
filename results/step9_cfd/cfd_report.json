@@ -1,0 +1,68 @@
+{
+  "step": "Step 9 \u2014 CFD Specificity Scoring",
+  "timestamp": "2026-09-29 18:54:02",
+  "runtime_seconds": 7.47,
+  "validation_summary": {
+    "total_checks": 13,
+    "passed_checks": 13,
+    "all_passed": true
+  },
+  "gene_summaries": [
+    {
+      "gene": "TP53",
+      "total_candidates": 3554,
+      "complete_cfd_scoring": 1965,
+      "censored_cfd_scoring": 1589,
+      "total_off_target_sites_scored": 2228626,
+      "mean_off_target_count": 627.08,
+      "mean_cfd_off_target_risk": 254.1651,
+      "min_cfd_off_target_risk": 0.0,
+      "max_cfd_off_target_risk": 999.0,
+      "mean_cfd_specificity_score": 0.6241,
+      "min_cfd_specificity_score": 0.091,
+      "max_cfd_specificity_score": 1.0
+    },
+    {
+      "gene": "HBB",
+      "total_candidates": 540,
+      "complete_cfd_scoring": 416,
+      "censored_cfd_scoring": 124,
+      "total_off_target_sites_scored": 273404,
+      "mean_off_target_count": 506.3,
+      "mean_cfd_off_target_risk": 69.1096,
+      "min_cfd_off_target_risk": 0.5502,
+      "max_cfd_off_target_risk": 999.0,
+      "mean_cfd_specificity_score": 0.7917,
+      "min_cfd_specificity_score": 0.091,
+      "max_cfd_specificity_score": 0.9945
+    },
+    {
+      "gene": "EGFR",
+      "total_candidates": 23112,
+      "complete_cfd_scoring": 19200,
+      "censored_cfd_scoring": 3912,
+      "total_off_target_sites_scored": 10618913,
+      "mean_off_target_count": 459.45,
+      "mean_cfd_off_target_risk": 47.7079,
+      "min_cfd_off_target_risk": 0.0,
+      "max_cfd_off_target_risk": 999.0,
+      "mean_cfd_specificity_score": 0.8236,
+      "min_cfd_specificity_score": 0.091,
+      "max_cfd_specificity_score": 1.0
+    },
+    {
+      "gene": "BRCA1",
+      "total_candidates": 15527,
+      "complete_cfd_scoring": 7104,
+      "censored_cfd_scoring": 8423,
+      "total_off_target_sites_scored": 11140126,
+      "mean_off_target_count": 717.47,
+      "mean_cfd_off_target_risk": 313.6724,
+      "min_cfd_off_target_risk": 0.0218,
+      "max_cfd_off_target_risk": 999.0,
+      "mean_cfd_specificity_score": 0.544,
+      "min_cfd_specificity_score": 0.091,
+      "max_cfd_specificity_score": 0.9998
+    }
+  ]
+}

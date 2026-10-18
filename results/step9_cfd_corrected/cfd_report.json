@@ -1,0 +1,85 @@
+{
+  "step": "Step 9C -- Corrected CFD Specificity Scoring",
+  "timestamp": "2026-09-29 19:47:51",
+  "runtime_seconds": 428.01,
+  "corrections_applied": [
+    "A: Exact Doench 2016 mismatch table (CRISPOR mismatch_score.pkl SHA 18f9f169)",
+    "B: 23-mer Bowtie alignment for actual PAM extraction (not hardcoded AGG)",
+    "C: Censored guides: cfd_off_target_risk and cfd_specificity_score set to NaN",
+    "D: Coordinate-based on-target exclusion with fallback to first-0mm"
+  ],
+  "source_provenance": {
+    "mismatch_table": "maximilianh/crisporWebsite CFD_Scoring/mismatch_score.pkl (blob SHA 18f9f169d00f377a2704ac51fa57a9571c571bbb)",
+    "pam_table": "maximilianh/crisporWebsite CFD_Scoring/pam_scores.pkl (blob SHA 86068fb0ac99de7fff296bf7181c327e83a39a9c)",
+    "repo_master_sha": "3aa198f1371bb15733acd98aaa097aad052cdbe3",
+    "license": "MIT",
+    "reference": "Doench JG et al. Nat Biotechnol 34:184-191 (2016)"
+  },
+  "validation": {
+    "total_checks": 14,
+    "passed_checks": 13,
+    "all_passed": false
+  },
+  "gene_summaries": [
+    {
+      "gene": "TP53",
+      "total_candidates": 4398,
+      "complete_cfd_scoring": 2937,
+      "censored_cfd_scoring": 1461,
+      "missing_cfd_risk_scores": 1461,
+      "n_sites_with_missing_pam": 1065276,
+      "n_perfect_copy_loci_total": 499428,
+      "mean_cfd_off_target_risk": 0.0,
+      "min_cfd_off_target_risk": 0.0,
+      "max_cfd_off_target_risk": 0.0,
+      "mean_cfd_specificity_score": 1.0,
+      "min_cfd_specificity_score": 1.0,
+      "max_cfd_specificity_score": 1.0
+    },
+    {
+      "gene": "HBB",
+      "total_candidates": 540,
+      "complete_cfd_scoring": 520,
+      "censored_cfd_scoring": 20,
+      "missing_cfd_risk_scores": 20,
+      "n_sites_with_missing_pam": 14743,
+      "n_perfect_copy_loci_total": 8323,
+      "mean_cfd_off_target_risk": 0.0,
+      "min_cfd_off_target_risk": 0.0,
+      "max_cfd_off_target_risk": 0.0,
+      "mean_cfd_specificity_score": 1.0,
+      "min_cfd_specificity_score": 1.0,
+      "max_cfd_specificity_score": 1.0
+    },
+    {
+      "gene": "EGFR",
+      "total_candidates": 23934,
+      "complete_cfd_scoring": 23305,
+      "censored_cfd_scoring": 629,
+      "missing_cfd_risk_scores": 629,
+      "n_sites_with_missing_pam": 465606,
+      "n_perfect_copy_loci_total": 288844,
+      "mean_cfd_off_target_risk": 0.0,
+      "min_cfd_off_target_risk": 0.0,
+      "max_cfd_off_target_risk": 0.0,
+      "mean_cfd_specificity_score": 1.0,
+      "min_cfd_specificity_score": 1.0,
+      "max_cfd_specificity_score": 1.0
+    },
+    {
+      "gene": "BRCA1",
+      "total_candidates": 30489,
+      "complete_cfd_scoring": 12618,
+      "censored_cfd_scoring": 17871,
+      "missing_cfd_risk_scores": 17871,
+      "n_sites_with_missing_pam": 13365071,
+      "n_perfect_copy_loci_total": 5145462,
+      "mean_cfd_off_target_risk": 0.0,
+      "min_cfd_off_target_risk": 0.0,
+      "max_cfd_off_target_risk": 0.0,
+      "mean_cfd_specificity_score": 1.0,
+      "min_cfd_specificity_score": 1.0,
+      "max_cfd_specificity_score": 1.0
+    }
+  ]
+}

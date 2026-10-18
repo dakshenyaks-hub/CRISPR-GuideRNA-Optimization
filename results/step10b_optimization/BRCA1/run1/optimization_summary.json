@@ -1,0 +1,228 @@
+{
+  "gene": "BRCA1",
+  "run_label": "run1",
+  "timestamp": "2026-10-12T06:52:01.049297+00:00",
+  "join_audit": {
+    "gene": "BRCA1",
+    "feature_file_rows": 15527,
+    "cfd_gene_rows_dedup": 15527,
+    "merged_rows": 15527,
+    "guides_with_cfd_data": 15527,
+    "guides_missing_cfd_data": 0,
+    "many_to_many_expansion": 0,
+    "join_ok": true
+  },
+  "feasibility_audit": {
+    "total_candidates": 15527,
+    "feasible_candidates": 5778,
+    "excluded_candidates": 9749,
+    "exclusion_breakdown": {
+      "nan_deep_spcas9_score": 1,
+      "gc_out_of_range": 2162,
+      "homopolymer_run_exceeded": 2160,
+      "poly_t_terminator": 1572,
+      "off_target_capped_excluded": 8423
+    },
+    "legacy_ot20_threshold_would_retain": 30,
+    "cfd_constraint_rationale": "Capped guides (OT=999) have cfd_scoring_status=CENSORED and cfd_off_target_risk=NaN. Excluded as scientifically conservative choice. Legacy raw OT<=20 NOT applied: CFD risk captures off-target quality for uncapped guides, making the raw count threshold redundant."
+  },
+  "pareto_analysis": {
+    "method": "epsilon-constraint (CFD specificity axis) + direct dominance",
+    "full_pareto_front_size": 10,
+    "verified_pareto_optimal_count": 10,
+    "weighted_sum_unique_solutions": 21
+  },
+  "objective_ranges_feasible": {
+    "activity_deep_spcas9": {
+      "min": -6.800053,
+      "max": 82.355247,
+      "mean": 42.865853,
+      "std": 16.61782
+    },
+    "norm_activity": {
+      "min": 0.0,
+      "max": 1.0,
+      "mean": 0.557072,
+      "std": 0.186392
+    },
+    "cfd_off_target_risk": {
+      "min": 0.0218,
+      "max": 456.9335,
+      "mean": 20.563241,
+      "std": 26.165285
+    },
+    "cfd_specificity_score": {
+      "min": 0.179555,
+      "max": 0.999782,
+      "mean": 0.85218,
+      "std": 0.114172
+    },
+    "norm_cfd_specificity": {
+      "min": 0.0,
+      "max": 1.0,
+      "mean": 0.820047,
+      "std": 0.139196
+    }
+  },
+  "selected_guides": [
+    {
+      "guide_id": "BRCA1_2088_+",
+      "guide_rna": "TCCGTGGCAACAGTAAAGCG",
+      "deep_spcas9_score": 78.216286,
+      "norm_activity": 0.953576,
+      "cfd_off_target_risk": 1.7582,
+      "cfd_specificity_score": 0.982722,
+      "norm_cfd_specificity": 0.979201,
+      "balanced_score": 0.966388,
+      "gc_content": 0.55,
+      "off_target_count": 43,
+      "cfd_scoring_status": "COMPLETE"
+    },
+    {
+      "guide_id": "BRCA1_2323_+",
+      "guide_rna": "CTATGAGGTGACCTTTACGG",
+      "deep_spcas9_score": 76.642555,
+      "norm_activity": 0.935924,
+      "cfd_off_target_risk": 0.7798,
+      "cfd_specificity_score": 0.992262,
+      "norm_cfd_specificity": 0.990832,
+      "balanced_score": 0.963378,
+      "gc_content": 0.5,
+      "off_target_count": 54,
+      "cfd_scoring_status": "COMPLETE"
+    },
+    {
+      "guide_id": "BRCA1_27410_-",
+      "guide_rna": "CGAAGGCTGTAGGCACACCG",
+      "deep_spcas9_score": 74.944092,
+      "norm_activity": 0.916874,
+      "cfd_off_target_risk": 0.111,
+      "cfd_specificity_score": 0.998891,
+      "norm_cfd_specificity": 0.998914,
+      "balanced_score": 0.957894,
+      "gc_content": 0.65,
+      "off_target_count": 35,
+      "cfd_scoring_status": "COMPLETE"
+    },
+    {
+      "guide_id": "BRCA1_122416_-",
+      "guide_rna": "CTGTCTGTCTGACTGAACGA",
+      "deep_spcas9_score": 80.077621,
+      "norm_activity": 0.974453,
+      "cfd_off_target_risk": 6.3734,
+      "cfd_specificity_score": 0.940085,
+      "norm_cfd_specificity": 0.927219,
+      "balanced_score": 0.950836,
+      "gc_content": 0.5,
+      "off_target_count": 227,
+      "cfd_scoring_status": "COMPLETE"
+    },
+    {
+      "guide_id": "BRCA1_74210_+",
+      "guide_rna": "TGAGTGGATACATTGAACCC",
+      "deep_spcas9_score": 78.908073,
+      "norm_activity": 0.961335,
+      "cfd_off_target_risk": 5.9868,
+      "cfd_specificity_score": 0.943514,
+      "norm_cfd_specificity": 0.931399,
+      "balanced_score": 0.946367,
+      "gc_content": 0.45,
+      "off_target_count": 227,
+      "cfd_scoring_status": "COMPLETE"
+    }
+  ],
+  "n_selected": 5,
+  "lp_track_a": {
+    "status": "optimal",
+    "objective_value_maximised": 4.801017,
+    "weights_used": {
+      "w1_activity": 0.5,
+      "w2_cfd_specificity": 0.5
+    },
+    "n_variables": 5778,
+    "k": 5,
+    "note": "LP RELAXATION x_i in [0,1]. NOT the binary MIP x_i in {0,1}. Fractional solutions reported exactly, never rounded.",
+    "solution_summary": {
+      "fully_selected_x_approx_1": 4,
+      "fractional_0_lt_x_lt_1": 1,
+      "fully_rejected_x_approx_0": 5773
+    },
+    "kkt_analysis": {
+      "mu_cardinality_dual": 0.954493,
+      "stationarity_max_residual": 0.0,
+      "cs_alpha_max": 5.4e-09,
+      "cs_beta_max": 3.8e-09,
+      "kkt_satisfied": true
+    },
+    "top_lp_variables": [
+      {
+        "guide_id": "BRCA1_2088_+",
+        "x_value": 1.0,
+        "norm_activity": 0.953576,
+        "norm_cfd_specificity": 0.979201
+      },
+      {
+        "guide_id": "BRCA1_2323_+",
+        "x_value": 1.0,
+        "norm_activity": 0.935924,
+        "norm_cfd_specificity": 0.990832
+      },
+      {
+        "guide_id": "BRCA1_2188_-",
+        "x_value": 0.999999,
+        "norm_activity": 0.932823,
+        "norm_cfd_specificity": 0.983373
+      },
+      {
+        "guide_id": "BRCA1_27410_-",
+        "x_value": 0.999999,
+        "norm_activity": 0.916874,
+        "norm_cfd_specificity": 0.998914
+      },
+      {
+        "guide_id": "BRCA1_46917_+",
+        "x_value": 0.999996,
+        "norm_activity": 0.930871,
+        "norm_cfd_specificity": 0.97965
+      },
+      {
+        "guide_id": "BRCA1_106541_+",
+        "x_value": 0.0,
+        "norm_activity": 0.949005,
+        "norm_cfd_specificity": 0.953449
+      },
+      {
+        "guide_id": "BRCA1_122416_-",
+        "x_value": 0.0,
+        "norm_activity": 0.974453,
+        "norm_cfd_specificity": 0.927219
+      },
+      {
+        "guide_id": "BRCA1_761_-",
+        "x_value": 0.0,
+        "norm_activity": 0.909857,
+        "norm_cfd_specificity": 0.99148
+      },
+      {
+        "guide_id": "BRCA1_87567_+",
+        "x_value": 0.0,
+        "norm_activity": 0.906691,
+        "norm_cfd_specificity": 0.992078
+      },
+      {
+        "guide_id": "BRCA1_2089_+",
+        "x_value": 0.0,
+        "norm_activity": 0.912488,
+        "norm_cfd_specificity": 0.985933
+      }
+    ]
+  },
+  "output_files": {
+    "feasible_candidates": "C:\\Users\\daksh\\Documents\\CRISPR-GuideRNA-Optimization\\results\\step10b_optimization\\BRCA1\\run1\\feasible_candidates.csv",
+    "excluded_candidates": "C:\\Users\\daksh\\Documents\\CRISPR-GuideRNA-Optimization\\results\\step10b_optimization\\BRCA1\\run1\\excluded_candidates.csv",
+    "pareto_front": "C:\\Users\\daksh\\Documents\\CRISPR-GuideRNA-Optimization\\results\\step10b_optimization\\BRCA1\\run1\\pareto_front.csv",
+    "weighted_sum": "C:\\Users\\daksh\\Documents\\CRISPR-GuideRNA-Optimization\\results\\step10b_optimization\\BRCA1\\run1\\weighted_sum_approximation.csv",
+    "selected_guides": "C:\\Users\\daksh\\Documents\\CRISPR-GuideRNA-Optimization\\results\\step10b_optimization\\BRCA1\\run1\\selected_guides.csv",
+    "pareto_plot": "C:\\Users\\daksh\\Documents\\CRISPR-GuideRNA-Optimization\\results\\step10b_optimization\\BRCA1\\run1\\pareto_front.png"
+  }
+}

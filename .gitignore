@@ -1,0 +1,58 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Pytest & Test coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+nosetests.xml
+coverage.xml
+*.cover
+
+# Virtual Environments
+venv/
+.venv/
+.venv*/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Operating System Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# IDE & Editor temporary files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+*.bak
+*.tmp
+
+# Note: Research data, models, results, reference tables, and reports are intentionally tracked and preserved:
+# !data/
+# !models/
+# !results/
+# !reports/
+
+# Large generated genome indexes — keep locally, do not push
+data/hg38_index/
+
+# Python virtual environments and caches
+.venv-linux/
+__pycache__/
+.pytest_cache/
+
+# External model repository kept locally
+models/Paired-Library/

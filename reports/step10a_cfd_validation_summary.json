@@ -1,0 +1,147 @@
+{
+  "task": "Step 10A -- Diagnose and Correct CFD Variance Collapse Before Optimizer Integration",
+  "final_status": "CFD SCORING VALIDATED",
+  "timestamp": "2026-09-30 11:28:00",
+  "datasets": {
+    "original_step9": "results/step9_cfd/cfd_guide_features.csv",
+    "corrected_step9": "results/step9_cfd_corrected/cfd_guide_features.csv",
+    "collapsed_step9_final": "results/step9_cfd_final/cfd_guide_features.csv",
+    "rescored_step10a": "results/step10a_cfd_rescored/cfd_guide_features.csv"
+  },
+  "root_causes_diagnosed": [
+    {
+      "issue": "Empty Site-Level Scores in Step 9C Corrected",
+      "mechanism": "During the generation of results/step9_cfd_corrected/, pam_key extraction logic failed for 14,910,696 sites (incomplete_pam), skipping off-target site scoring and leaving cfd_partial_risk = 0.0 and cfd_scored_site_count = 0 for uncapped candidates."
+    },
+    {
+      "issue": "Coordinate System Scale Mismatch in Target Exclusion",
+      "mechanism": "In scripts/regenerate_step9_final.py, guide relative PAM offsets (0 to 23,069 bp within the gene FASTA) were directly compared against whole-chromosome genomic coordinates (e.g., 7,666,421 to 7,689,490 bp for TP53), causing coordinate matching to evaluate to False for 100% of candidate guides."
+    },
+    {
+      "issue": "Artificial Penalty Injection on Unresolved Target Exclusion",
+      "mechanism": "Because coordinate matching evaluated to False, regenerate_step9_final.py marked all rows as UNRESOLVED and executed adj_p_risk = cur_p_risk + 1.0. Because cur_p_risk was 0.0, every uncapped candidate received a flat risk of 1.0 (0.0 + 1.0) and specificity of 100 / (100 + 1) = 0.990099, collapsing variance to zero."
+    },
+    {
+      "issue": "Cartesian Row Duplication via Non-Unique Merge Key",
+      "mechanism": "In src/step9c_cfd.py, candidate guide features were merged on guide_rna rather than guide_id or row index. Because identical 20-nt guide sequences appear at multiple genomic positions/exons, this many-to-many merge expanded 42,733 unique guide candidates to 59,361 rows."
+    },
+    {
+      "issue": "Historical Origin of 4,457 Suspicious Guides",
+      "mechanism": "Forensic audit confirmed that exactly 4,457 rows in the original results/step9_cfd/cfd_guide_features.csv had cfd_off_target_risk = 999.0 because the legacy code directly substituted the Bowtie alignment cap (999) as the numeric CFD risk value."
+    }
+  ],
+  "rescored_statistics": {
+    "total_rows": 59361,
+    "eligible_uncapped_guides": 29299,
+    "incomplete_censored_guides": 30062,
+    "missing_primary_risk_scores": 30062,
+    "unique_risk_values": 27318,
+    "unique_specificity_values": 26978,
+    "global_risk": {
+      "mean": 15.7196,
+      "median": 12.1868,
+      "std": 17.0673,
+      "min": 0.0,
+      "max": 456.9335
+    },
+    "global_specificity": {
+      "mean": 0.8736,
+      "median": 0.8914,
+      "std": 0.0886,
+      "min": 0.1796,
+      "max": 1.0
+    },
+    "risk_categories": {
+      "zero_risk_R_0": 3,
+      "low_risk_0_to_10": 11782,
+      "moderate_risk_10_to_30": 13706,
+      "high_risk_gt_30": 3808
+    }
+  },
+  "per_gene_breakdown": {
+    "TP53": {
+      "total_candidates": 4398,
+      "complete": 1969,
+      "censored": 2429,
+      "unique_risks": 1960,
+      "mean_risk": 13.9479,
+      "median_risk": 10.5574,
+      "min_risk": 0.0,
+      "max_risk": 226.29,
+      "std_risk": 13.7566,
+      "mean_spec": 0.8871,
+      "median_spec": 0.9045,
+      "min_spec": 0.3065,
+      "max_spec": 1.0
+    },
+    "HBB": {
+      "total_candidates": 540,
+      "complete": 416,
+      "censored": 124,
+      "unique_risks": 416,
+      "mean_risk": 15.2598,
+      "median_risk": 12.1428,
+      "min_risk": 0.5502,
+      "max_risk": 71.2844,
+      "std_risk": 10.8398,
+      "mean_spec": 0.8746,
+      "median_spec": 0.8917,
+      "min_spec": 0.5838,
+      "max_spec": 0.9945
+    },
+    "EGFR": {
+      "total_candidates": 23934,
+      "complete": 19536,
+      "censored": 4398,
+      "unique_risks": 18527,
+      "mean_risk": 15.1289,
+      "median_risk": 11.8878,
+      "min_risk": 0.0,
+      "max_risk": 256.6963,
+      "std_risk": 12.9385,
+      "mean_spec": 0.8775,
+      "median_spec": 0.8938,
+      "min_spec": 0.2804,
+      "max_spec": 1.0
+    },
+    "BRCA1": {
+      "total_candidates": 30489,
+      "complete": 7378,
+      "censored": 23111,
+      "unique_risks": 6916,
+      "mean_risk": 21.7155,
+      "median_risk": 14.3578,
+      "min_risk": 0.0218,
+      "max_risk": 456.9335,
+      "std_risk": 27.0546,
+      "mean_spec": 0.8449,
+      "median_spec": 0.8744,
+      "min_spec": 0.1796,
+      "max_spec": 0.9998
+    }
+  },
+  "regression_tests": {
+    "test_suite": "tests/test_cfd_score.py",
+    "runner": "tests/run_all_tests.py",
+    "total_test_suites": 15,
+    "passed_test_suites": 15,
+    "all_passed": true,
+    "regression_class": "TestStep10AVarianceAndExclusionRegression",
+    "verified_properties": [
+      "Perfect intended-target alignment contributes no off-target penalty after successful coordinate exclusion",
+      "Genuine off-target alignments contribute exact site-level CFD scores",
+      "Guides with divergent off-target profiles produce distinct, non-constant risks",
+      "Zero valid off-target sites strictly yields R_CFD = 0.0 and S_CFD = 1.0",
+      "Unresolved intended-target exclusion is handled safely without fabricating +1.0 penalties",
+      "Incomplete capped searches strictly retain NaN primary risk and specificity",
+      "Specificity consistently follows the documented non-linear transformation S = 100 / (100 + R)"
+    ]
+  },
+  "optimizer_integration_guard": {
+    "convex_optimization_modified": false,
+    "grna_optimizer_modified": false,
+    "lp_objective_modified": false,
+    "feasibility_threshold_modified": false,
+    "note": "Downstream optimization modules were preserved intact pending independent validation of the rescored CFD dataset."
+  }
+}

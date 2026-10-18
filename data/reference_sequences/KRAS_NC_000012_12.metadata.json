@@ -1,0 +1,19 @@
+{
+  "gene_symbol": "KRAS",
+  "organism": "Homo sapiens",
+  "ncbi_gene_id": "3845",
+  "chromosome": "12",
+  "genomic_accession": "NC_000012.12",
+  "assembly": "GRCh38",
+  "sequence_type": "genomic_DNA",
+  "strand": "minus",
+  "gene_start": 25205246,
+  "gene_stop": 25250929,
+  "retrieved_start": 25203246,
+  "retrieved_stop": 25252929,
+  "sequence_length": 49684,
+  "retrieval_timestamp": "2026-10-08T15:20:18.748621+00:00",
+  "fasta_path": "/mnt/c/Users/daksh/Documents/CRISPR-GuideRNA-Optimization/data/reference_sequences/KRAS_NC_000012_12.fasta",
+  "selection_rule": "Retrieved genomic DNA from GRCh38 reference chromosome. Region includes gene body plus 2000 bp flanking on each side. Sequence is on the gene's native strand orientation.",
+  "notes": ""
+}

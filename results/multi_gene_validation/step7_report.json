@@ -1,0 +1,790 @@
+{
+  "timestamp": "2026-09-29T04:38:50.007343+00:00",
+  "step": "Step 7 \u2014 Multi-Gene Validation and Gene-Independence Test",
+  "genes_tested": [
+    "TP53",
+    "HBB",
+    "EGFR",
+    "BRCA1"
+  ],
+  "gene_documentation": {
+    "TP53": {
+      "description": "Tumor protein p53 \u2014 tumor suppressor",
+      "ncbi_gene_id": "7157",
+      "chromosome": "17",
+      "strand": "minus",
+      "expected_size_kb": "~19 kb (gene body)",
+      "notes": "Baseline reference case, already validated in Steps 1-6"
+    },
+    "HBB": {
+      "description": "Hemoglobin subunit beta \u2014 oxygen transport",
+      "ncbi_gene_id": "3043",
+      "chromosome": "11",
+      "strand": "plus",
+      "expected_size_kb": "~1.6 kb (gene body)",
+      "notes": "Small gene, sickle cell disease target, plus strand"
+    },
+    "EGFR": {
+      "description": "Epidermal growth factor receptor \u2014 oncogene",
+      "ncbi_gene_id": "1956",
+      "chromosome": "7",
+      "strand": "plus",
+      "expected_size_kb": "~188 kb (gene body)",
+      "notes": "Large gene, cancer drug target, plus strand"
+    },
+    "BRCA1": {
+      "description": "Breast cancer type 1 susceptibility protein",
+      "ncbi_gene_id": "672",
+      "chromosome": "17",
+      "strand": "minus",
+      "expected_size_kb": "~81 kb (gene body)",
+      "notes": "Large gene, same chromosome as TP53, minus strand"
+    }
+  },
+  "per_gene_statistics": {
+    "TP53": {
+      "gene": "TP53",
+      "status": "COMPLETE",
+      "accession": "NC_000017.11",
+      "assembly": "GRCh38",
+      "chromosome": "17",
+      "strand": "minus",
+      "gene_start": 7668421,
+      "gene_stop": 7687490,
+      "sequence_length": 23070,
+      "retrieved_start": 7666421,
+      "retrieved_stop": 7689490,
+      "fasta_path": "C:\\Users\\daksh\\Documents\\CRISPR-GuideRNA-Optimization\\data\\reference_sequences\\TP53_NC_000017_11.fasta",
+      "total_candidates": 3554,
+      "plus_strand_candidates": 1825,
+      "minus_strand_candidates": 1729,
+      "candidate_density": 154.05,
+      "feature_columns": [
+        "guide_id",
+        "gene",
+        "guide_rna",
+        "pam_sequence",
+        "pam_position",
+        "strand",
+        "guide_length",
+        "length",
+        "gc_content",
+        "A_count",
+        "C_count",
+        "G_count",
+        "T_count",
+        "frac_A",
+        "frac_C",
+        "frac_G",
+        "frac_T",
+        "has_poly_t_terminator",
+        "max_homopolymer_run",
+        "starts_with_g",
+        "melting_temp_c",
+        "delta_g_kcal_mol",
+        "secondary_structure",
+        "folding_energy_kcal_mol",
+        "paired_fraction",
+        "doench2016_proxy_score",
+        "off_target_count",
+        "mismatch_score",
+        "off_targets_0mm",
+        "off_targets_1mm",
+        "off_targets_2mm",
+        "off_targets_3mm",
+        "off_target_capped",
+        "deep_spcas9_score"
+      ],
+      "feature_column_count": 34,
+      "schema_matches_expected": true,
+      "deepspcas9": {
+        "total": 3554,
+        "predicted": 3553,
+        "nan_invalid": 1,
+        "min": -8.6266,
+        "max": 84.8229,
+        "mean": 40.0686,
+        "median": 42.4046
+      },
+      "off_target": {
+        "uncapped_guides": 1965,
+        "capped_guides": 1589,
+        "min_ot_count": 6,
+        "max_uncapped_ot_count": 994
+      },
+      "filtering": {
+        "total_candidates": 3554,
+        "nan_deep_spcas9": 1,
+        "gc_failures": 440,
+        "poly_t_failures": 275,
+        "homopolymer_failures": 449,
+        "excluded": 763,
+        "feasible": 2791,
+        "feasible_pct": 78.5,
+        "capped_in_feasible": 1143
+      },
+      "pareto_count": 9,
+      "selected_guide": {
+        "guide_id": "TP53_11911_-",
+        "guide_rna": "TTGGCTAGCCAGGAACATGG",
+        "strand": "-",
+        "gc_content": 0.55,
+        "deep_spcas9_score": 84.8229,
+        "off_target_count": 158,
+        "off_target_capped": false,
+        "norm_activity": 1.0,
+        "norm_specificity": 0.846928,
+        "balanced_score": 0.923464
+      },
+      "validation_all_passed": true
+    },
+    "HBB": {
+      "gene": "HBB",
+      "status": "COMPLETE",
+      "accession": "NC_000011.10",
+      "assembly": "GRCh38",
+      "chromosome": "11",
+      "strand": "minus",
+      "gene_start": 5225464,
+      "gene_stop": 5227071,
+      "sequence_length": 5608,
+      "retrieved_start": 5223464,
+      "retrieved_stop": 5229071,
+      "fasta_path": "C:\\Users\\daksh\\Documents\\CRISPR-GuideRNA-Optimization\\data\\reference_sequences\\HBB_NC_000011_10.fasta",
+      "total_candidates": 540,
+      "plus_strand_candidates": 290,
+      "minus_strand_candidates": 250,
+      "candidate_density": 96.29,
+      "feature_columns": [
+        "guide_id",
+        "gene",
+        "guide_rna",
+        "pam_sequence",
+        "pam_position",
+        "strand",
+        "guide_length",
+        "length",
+        "gc_content",
+        "A_count",
+        "C_count",
+        "G_count",
+        "T_count",
+        "frac_A",
+        "frac_C",
+        "frac_G",
+        "frac_T",
+        "has_poly_t_terminator",
+        "max_homopolymer_run",
+        "starts_with_g",
+        "melting_temp_c",
+        "delta_g_kcal_mol",
+        "secondary_structure",
+        "folding_energy_kcal_mol",
+        "paired_fraction",
+        "doench2016_proxy_score",
+        "off_target_count",
+        "mismatch_score",
+        "off_targets_0mm",
+        "off_targets_1mm",
+        "off_targets_2mm",
+        "off_targets_3mm",
+        "off_target_capped",
+        "deep_spcas9_score"
+      ],
+      "feature_column_count": 34,
+      "schema_matches_expected": true,
+      "deepspcas9": {
+        "total": 540,
+        "predicted": 537,
+        "nan_invalid": 3,
+        "min": -3.896,
+        "max": 81.7955,
+        "mean": 37.3446,
+        "median": 38.7522
+      },
+      "off_target": {
+        "uncapped_guides": 416,
+        "capped_guides": 124,
+        "min_ot_count": 27,
+        "max_uncapped_ot_count": 987
+      },
+      "filtering": {
+        "total_candidates": 540,
+        "nan_deep_spcas9": 3,
+        "gc_failures": 84,
+        "poly_t_failures": 53,
+        "homopolymer_failures": 57,
+        "excluded": 133,
+        "feasible": 407,
+        "feasible_pct": 75.4,
+        "capped_in_feasible": 42
+      },
+      "pareto_count": 9,
+      "selected_guide": {
+        "guide_id": "HBB_3541_+",
+        "guide_rna": "TAAGTCCAACTACTAAACTG",
+        "strand": "+",
+        "gc_content": 0.35,
+        "deep_spcas9_score": 81.7955,
+        "off_target_count": 179,
+        "off_target_capped": false,
+        "norm_activity": 1.0,
+        "norm_specificity": 0.843621,
+        "balanced_score": 0.921811
+      },
+      "validation_all_passed": true
+    },
+    "EGFR": {
+      "gene": "EGFR",
+      "status": "COMPLETE",
+      "accession": "NC_000007.14",
+      "assembly": "GRCh38",
+      "chromosome": "7",
+      "strand": "plus",
+      "gene_start": 55019017,
+      "gene_stop": 55211628,
+      "sequence_length": 196612,
+      "retrieved_start": 55017017,
+      "retrieved_stop": 55213628,
+      "fasta_path": "C:\\Users\\daksh\\Documents\\CRISPR-GuideRNA-Optimization\\data\\reference_sequences\\EGFR_NC_000007_14.fasta",
+      "total_candidates": 23112,
+      "plus_strand_candidates": 11183,
+      "minus_strand_candidates": 11929,
+      "candidate_density": 117.55,
+      "feature_columns": [
+        "guide_id",
+        "gene",
+        "guide_rna",
+        "pam_sequence",
+        "pam_position",
+        "strand",
+        "guide_length",
+        "length",
+        "gc_content",
+        "A_count",
+        "C_count",
+        "G_count",
+        "T_count",
+        "frac_A",
+        "frac_C",
+        "frac_G",
+        "frac_T",
+        "has_poly_t_terminator",
+        "max_homopolymer_run",
+        "starts_with_g",
+        "melting_temp_c",
+        "delta_g_kcal_mol",
+        "secondary_structure",
+        "folding_energy_kcal_mol",
+        "paired_fraction",
+        "doench2016_proxy_score",
+        "off_target_count",
+        "mismatch_score",
+        "off_targets_0mm",
+        "off_targets_1mm",
+        "off_targets_2mm",
+        "off_targets_3mm",
+        "off_target_capped",
+        "deep_spcas9_score"
+      ],
+      "feature_column_count": 34,
+      "schema_matches_expected": true,
+      "deepspcas9": {
+        "total": 23112,
+        "predicted": 23110,
+        "nan_invalid": 2,
+        "min": -15.2618,
+        "max": 84.0157,
+        "mean": 40.9293,
+        "median": 43.5695
+      },
+      "off_target": {
+        "uncapped_guides": 19200,
+        "capped_guides": 3912,
+        "min_ot_count": 3,
+        "max_uncapped_ot_count": 998
+      },
+      "filtering": {
+        "total_candidates": 23112,
+        "nan_deep_spcas9": 2,
+        "gc_failures": 2742,
+        "poly_t_failures": 1890,
+        "homopolymer_failures": 1861,
+        "excluded": 4943,
+        "feasible": 18169,
+        "feasible_pct": 78.6,
+        "capped_in_feasible": 2079
+      },
+      "pareto_count": 12,
+      "selected_guide": {
+        "guide_id": "EGFR_100693_+",
+        "guide_rna": "GTGCAGAGTGCCCTCAACGA",
+        "strand": "+",
+        "gc_content": 0.6,
+        "deep_spcas9_score": 81.0126,
+        "off_target_count": 61,
+        "off_target_capped": false,
+        "norm_activity": 0.965543,
+        "norm_specificity": 0.941767,
+        "balanced_score": 0.953655
+      },
+      "validation_all_passed": true
+    },
+    "BRCA1": {
+      "gene": "BRCA1",
+      "status": "COMPLETE",
+      "accession": "NC_000017.11",
+      "assembly": "GRCh38",
+      "chromosome": "17",
+      "strand": "minus",
+      "gene_start": 43044295,
+      "gene_stop": 43170327,
+      "sequence_length": 130033,
+      "retrieved_start": 43042295,
+      "retrieved_stop": 43172327,
+      "fasta_path": "C:\\Users\\daksh\\Documents\\CRISPR-GuideRNA-Optimization\\data\\reference_sequences\\BRCA1_NC_000017_11.fasta",
+      "total_candidates": 15527,
+      "plus_strand_candidates": 7824,
+      "minus_strand_candidates": 7703,
+      "candidate_density": 119.41,
+      "feature_columns": [
+        "guide_id",
+        "gene",
+        "guide_rna",
+        "pam_sequence",
+        "pam_position",
+        "strand",
+        "guide_length",
+        "length",
+        "gc_content",
+        "A_count",
+        "C_count",
+        "G_count",
+        "T_count",
+        "frac_A",
+        "frac_C",
+        "frac_G",
+        "frac_T",
+        "has_poly_t_terminator",
+        "max_homopolymer_run",
+        "starts_with_g",
+        "melting_temp_c",
+        "delta_g_kcal_mol",
+        "secondary_structure",
+        "folding_energy_kcal_mol",
+        "paired_fraction",
+        "doench2016_proxy_score",
+        "off_target_count",
+        "mismatch_score",
+        "off_targets_0mm",
+        "off_targets_1mm",
+        "off_targets_2mm",
+        "off_targets_3mm",
+        "off_target_capped",
+        "deep_spcas9_score"
+      ],
+      "feature_column_count": 34,
+      "schema_matches_expected": true,
+      "deepspcas9": {
+        "total": 15527,
+        "predicted": 15526,
+        "nan_invalid": 1,
+        "min": -13.3806,
+        "max": 83.2726,
+        "mean": 37.8737,
+        "median": 40.1824
+      },
+      "off_target": {
+        "uncapped_guides": 7104,
+        "capped_guides": 8423,
+        "min_ot_count": 2,
+        "max_uncapped_ot_count": 997
+      },
+      "filtering": {
+        "total_candidates": 15527,
+        "nan_deep_spcas9": 1,
+        "gc_failures": 2162,
+        "poly_t_failures": 1572,
+        "homopolymer_failures": 2160,
+        "excluded": 3794,
+        "feasible": 11733,
+        "feasible_pct": 75.6,
+        "capped_in_feasible": 5955
+      },
+      "pareto_count": 7,
+      "selected_guide": {
+        "guide_id": "BRCA1_2088_+",
+        "guide_rna": "TCCGTGGCAACAGTAAAGCG",
+        "strand": "+",
+        "gc_content": 0.55,
+        "deep_spcas9_score": 78.2163,
+        "off_target_count": 43,
+        "off_target_capped": false,
+        "norm_activity": 0.943864,
+        "norm_specificity": 0.958877,
+        "balanced_score": 0.95137
+      },
+      "validation_all_passed": true
+    }
+  },
+  "gene_comparison": [
+    {
+      "Gene": "TP53",
+      "Seq Length": 23070,
+      "Candidates": 3554,
+      "Feasible": 2791,
+      "Feasible %": 78.5,
+      "Pareto Guides": 9,
+      "Capped Guides": 1143,
+      "Mean DeepSpCas9": 40.0686,
+      "Best DeepSpCas9": 84.8229,
+      "Selected Guide": "TP53_11911_-"
+    },
+    {
+      "Gene": "HBB",
+      "Seq Length": 5608,
+      "Candidates": 540,
+      "Feasible": 407,
+      "Feasible %": 75.4,
+      "Pareto Guides": 9,
+      "Capped Guides": 42,
+      "Mean DeepSpCas9": 37.3446,
+      "Best DeepSpCas9": 81.7955,
+      "Selected Guide": "HBB_3541_+"
+    },
+    {
+      "Gene": "EGFR",
+      "Seq Length": 196612,
+      "Candidates": 23112,
+      "Feasible": 18169,
+      "Feasible %": 78.6,
+      "Pareto Guides": 12,
+      "Capped Guides": 2079,
+      "Mean DeepSpCas9": 40.9293,
+      "Best DeepSpCas9": 84.0157,
+      "Selected Guide": "EGFR_100693_+"
+    },
+    {
+      "Gene": "BRCA1",
+      "Seq Length": 130033,
+      "Candidates": 15527,
+      "Feasible": 11733,
+      "Feasible %": 75.6,
+      "Pareto Guides": 7,
+      "Capped Guides": 5955,
+      "Mean DeepSpCas9": 37.8737,
+      "Best DeepSpCas9": 83.2726,
+      "Selected Guide": "BRCA1_2088_+"
+    }
+  ],
+  "selected_guide_comparison": [
+    {
+      "Gene": "TP53",
+      "Guide ID": "TP53_11911_-",
+      "Guide Sequence": "TTGGCTAGCCAGGAACATGG",
+      "Strand": "-",
+      "GC": 0.55,
+      "DeepSpCas9": 84.8229,
+      "Off-target Count": 158,
+      "E_hat": 1.0,
+      "S_hat": 0.846928,
+      "Balanced Score": 0.923464
+    },
+    {
+      "Gene": "HBB",
+      "Guide ID": "HBB_3541_+",
+      "Guide Sequence": "TAAGTCCAACTACTAAACTG",
+      "Strand": "+",
+      "GC": 0.35,
+      "DeepSpCas9": 81.7955,
+      "Off-target Count": 179,
+      "E_hat": 1.0,
+      "S_hat": 0.843621,
+      "Balanced Score": 0.921811
+    },
+    {
+      "Gene": "EGFR",
+      "Guide ID": "EGFR_100693_+",
+      "Guide Sequence": "GTGCAGAGTGCCCTCAACGA",
+      "Strand": "+",
+      "GC": 0.6,
+      "DeepSpCas9": 81.0126,
+      "Off-target Count": 61,
+      "E_hat": 0.965543,
+      "S_hat": 0.941767,
+      "Balanced Score": 0.953655
+    },
+    {
+      "Gene": "BRCA1",
+      "Guide ID": "BRCA1_2088_+",
+      "Guide Sequence": "TCCGTGGCAACAGTAAAGCG",
+      "Strand": "+",
+      "GC": 0.55,
+      "DeepSpCas9": 78.2163,
+      "Off-target Count": 43,
+      "E_hat": 0.943864,
+      "S_hat": 0.958877,
+      "Balanced Score": 0.95137
+    }
+  ],
+  "validation_results": {
+    "TP53": {
+      "gene_name_correct": {
+        "pass": true,
+        "detail": "Gene: TP53"
+      },
+      "sequence_source_valid": {
+        "pass": true,
+        "detail": "Accession: NC_000017.11"
+      },
+      "sequence_non_empty": {
+        "pass": true,
+        "detail": "Length: 23070 bp"
+      },
+      "guide_length_20": {
+        "pass": true,
+        "detail": "All guides 20nt: True"
+      },
+      "pam_ngg": {
+        "pass": true,
+        "detail": "All PAMs match NGG: True"
+      },
+      "both_strands": {
+        "pass": true,
+        "detail": "Plus: True, Minus: True"
+      },
+      "feature_schema_matches": {
+        "pass": true,
+        "detail": "Column count: 34, Match: True"
+      },
+      "deepspcas9_predictions_valid": {
+        "pass": true,
+        "detail": "Predicted: 3553, NaN: 1"
+      },
+      "nan_boundary_only": {
+        "pass": true,
+        "detail": "NaN DeepSpCas9: 1 (tolerance: <= 5)"
+      },
+      "optimization_complete": {
+        "pass": true,
+        "detail": "Status: COMPLETE"
+      },
+      "pareto_non_empty": {
+        "pass": true,
+        "detail": "Pareto guides: 9"
+      },
+      "selected_guide_exists": {
+        "pass": true,
+        "detail": "Selected: TP53_11911_-"
+      },
+      "all_optimization_checks_passed": {
+        "pass": true,
+        "detail": "All passed: True"
+      }
+    },
+    "HBB": {
+      "gene_name_correct": {
+        "pass": true,
+        "detail": "Gene: HBB"
+      },
+      "sequence_source_valid": {
+        "pass": true,
+        "detail": "Accession: NC_000011.10"
+      },
+      "sequence_non_empty": {
+        "pass": true,
+        "detail": "Length: 5608 bp"
+      },
+      "guide_length_20": {
+        "pass": true,
+        "detail": "All guides 20nt: True"
+      },
+      "pam_ngg": {
+        "pass": true,
+        "detail": "All PAMs match NGG: True"
+      },
+      "both_strands": {
+        "pass": true,
+        "detail": "Plus: True, Minus: True"
+      },
+      "feature_schema_matches": {
+        "pass": true,
+        "detail": "Column count: 34, Match: True"
+      },
+      "deepspcas9_predictions_valid": {
+        "pass": true,
+        "detail": "Predicted: 537, NaN: 3"
+      },
+      "nan_boundary_only": {
+        "pass": true,
+        "detail": "NaN DeepSpCas9: 3 (tolerance: <= 5)"
+      },
+      "optimization_complete": {
+        "pass": true,
+        "detail": "Status: COMPLETE"
+      },
+      "pareto_non_empty": {
+        "pass": true,
+        "detail": "Pareto guides: 9"
+      },
+      "selected_guide_exists": {
+        "pass": true,
+        "detail": "Selected: HBB_3541_+"
+      },
+      "all_optimization_checks_passed": {
+        "pass": true,
+        "detail": "All passed: True"
+      }
+    },
+    "EGFR": {
+      "gene_name_correct": {
+        "pass": true,
+        "detail": "Gene: EGFR"
+      },
+      "sequence_source_valid": {
+        "pass": true,
+        "detail": "Accession: NC_000007.14"
+      },
+      "sequence_non_empty": {
+        "pass": true,
+        "detail": "Length: 196612 bp"
+      },
+      "guide_length_20": {
+        "pass": true,
+        "detail": "All guides 20nt: True"
+      },
+      "pam_ngg": {
+        "pass": true,
+        "detail": "All PAMs match NGG: True"
+      },
+      "both_strands": {
+        "pass": true,
+        "detail": "Plus: True, Minus: True"
+      },
+      "feature_schema_matches": {
+        "pass": true,
+        "detail": "Column count: 34, Match: True"
+      },
+      "deepspcas9_predictions_valid": {
+        "pass": true,
+        "detail": "Predicted: 23110, NaN: 2"
+      },
+      "nan_boundary_only": {
+        "pass": true,
+        "detail": "NaN DeepSpCas9: 2 (tolerance: <= 5)"
+      },
+      "optimization_complete": {
+        "pass": true,
+        "detail": "Status: COMPLETE"
+      },
+      "pareto_non_empty": {
+        "pass": true,
+        "detail": "Pareto guides: 12"
+      },
+      "selected_guide_exists": {
+        "pass": true,
+        "detail": "Selected: EGFR_100693_+"
+      },
+      "all_optimization_checks_passed": {
+        "pass": true,
+        "detail": "All passed: True"
+      }
+    },
+    "BRCA1": {
+      "gene_name_correct": {
+        "pass": true,
+        "detail": "Gene: BRCA1"
+      },
+      "sequence_source_valid": {
+        "pass": true,
+        "detail": "Accession: NC_000017.11"
+      },
+      "sequence_non_empty": {
+        "pass": true,
+        "detail": "Length: 130033 bp"
+      },
+      "guide_length_20": {
+        "pass": true,
+        "detail": "All guides 20nt: True"
+      },
+      "pam_ngg": {
+        "pass": true,
+        "detail": "All PAMs match NGG: True"
+      },
+      "both_strands": {
+        "pass": true,
+        "detail": "Plus: True, Minus: True"
+      },
+      "feature_schema_matches": {
+        "pass": true,
+        "detail": "Column count: 34, Match: True"
+      },
+      "deepspcas9_predictions_valid": {
+        "pass": true,
+        "detail": "Predicted: 15526, NaN: 1"
+      },
+      "nan_boundary_only": {
+        "pass": true,
+        "detail": "NaN DeepSpCas9: 1 (tolerance: <= 5)"
+      },
+      "optimization_complete": {
+        "pass": true,
+        "detail": "Status: COMPLETE"
+      },
+      "pareto_non_empty": {
+        "pass": true,
+        "detail": "Pareto guides: 7"
+      },
+      "selected_guide_exists": {
+        "pass": true,
+        "detail": "Selected: BRCA1_2088_+"
+      },
+      "all_optimization_checks_passed": {
+        "pass": true,
+        "detail": "All passed: True"
+      }
+    }
+  },
+  "validation_summary": [
+    {
+      "Gene": "TP53",
+      "Overall": "PASS",
+      "Checks_Passed": 13,
+      "Checks_Total": 13
+    },
+    {
+      "Gene": "HBB",
+      "Overall": "PASS",
+      "Checks_Passed": 13,
+      "Checks_Total": 13
+    },
+    {
+      "Gene": "EGFR",
+      "Overall": "PASS",
+      "Checks_Passed": 13,
+      "Checks_Total": 13
+    },
+    {
+      "Gene": "BRCA1",
+      "Overall": "PASS",
+      "Checks_Passed": 13,
+      "Checks_Total": 13
+    }
+  ],
+  "plots_generated": [
+    "C:\\Users\\daksh\\Documents\\CRISPR-GuideRNA-Optimization\\results\\multi_gene_validation\\plots\\01_candidate_count_by_gene.png",
+    "C:\\Users\\daksh\\Documents\\CRISPR-GuideRNA-Optimization\\results\\multi_gene_validation\\plots\\02_feasible_vs_excluded.png",
+    "C:\\Users\\daksh\\Documents\\CRISPR-GuideRNA-Optimization\\results\\multi_gene_validation\\plots\\03_deepspcas9_distribution.png",
+    "C:\\Users\\daksh\\Documents\\CRISPR-GuideRNA-Optimization\\results\\multi_gene_validation\\plots\\04_pareto_fronts_multi_gene.png",
+    "C:\\Users\\daksh\\Documents\\CRISPR-GuideRNA-Optimization\\results\\multi_gene_validation\\plots\\05_selected_guide_comparison.png"
+  ],
+  "limitations": [
+    "TP53 is only the baseline demonstration case.",
+    "off_target_count is a computational hit count, not a complete biological specificity score.",
+    "Capped off-target counts (>=999) are lower-bound/censored computational values.",
+    "Equal weighting (0.5/0.5) is a demonstration preference, not universally optimal.",
+    "Multi-gene computational validation does not establish experimental biological efficacy.",
+    "This framework does not claim universal gene independence or clinical validity."
+  ],
+  "conclusion": "The computational framework demonstrates gene-independent operation across multiple human genes under a common candidate-generation, feature-extraction, prediction, and multi-objective optimization pipeline."
+}

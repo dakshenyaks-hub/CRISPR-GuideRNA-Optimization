@@ -1,0 +1,228 @@
+{
+  "gene": "TP53",
+  "run_label": "run1",
+  "timestamp": "2026-10-12T06:51:57.198098+00:00",
+  "join_audit": {
+    "gene": "TP53",
+    "feature_file_rows": 3554,
+    "cfd_gene_rows_dedup": 3554,
+    "merged_rows": 3554,
+    "guides_with_cfd_data": 3554,
+    "guides_missing_cfd_data": 0,
+    "many_to_many_expansion": 0,
+    "join_ok": true
+  },
+  "feasibility_audit": {
+    "total_candidates": 3554,
+    "feasible_candidates": 1648,
+    "excluded_candidates": 1906,
+    "exclusion_breakdown": {
+      "nan_deep_spcas9_score": 1,
+      "gc_out_of_range": 440,
+      "homopolymer_run_exceeded": 449,
+      "poly_t_terminator": 275,
+      "off_target_capped_excluded": 1589
+    },
+    "legacy_ot20_threshold_would_retain": 33,
+    "cfd_constraint_rationale": "Capped guides (OT=999) have cfd_scoring_status=CENSORED and cfd_off_target_risk=NaN. Excluded as scientifically conservative choice. Legacy raw OT<=20 NOT applied: CFD risk captures off-target quality for uncapped guides, making the raw count threshold redundant."
+  },
+  "pareto_analysis": {
+    "method": "epsilon-constraint (CFD specificity axis) + direct dominance",
+    "full_pareto_front_size": 8,
+    "verified_pareto_optimal_count": 8,
+    "weighted_sum_unique_solutions": 20
+  },
+  "objective_ranges_feasible": {
+    "activity_deep_spcas9": {
+      "min": -0.189009,
+      "max": 84.822945,
+      "mean": 45.839088,
+      "std": 15.477365
+    },
+    "norm_activity": {
+      "min": 0.0,
+      "max": 1.0,
+      "mean": 0.541431,
+      "std": 0.182061
+    },
+    "cfd_off_target_risk": {
+      "min": 0.0,
+      "max": 226.29,
+      "mean": 13.502087,
+      "std": 13.700818
+    },
+    "cfd_specificity_score": {
+      "min": 0.306476,
+      "max": 1.0,
+      "mean": 0.890179,
+      "std": 0.080333
+    },
+    "norm_cfd_specificity": {
+      "min": 0.0,
+      "max": 1.0,
+      "mean": 0.841648,
+      "std": 0.115833
+    }
+  },
+  "selected_guides": [
+    {
+      "guide_id": "TP53_150_-",
+      "guide_rna": "AAGTGGTAAGGATAACAACG",
+      "deep_spcas9_score": 83.946281,
+      "norm_activity": 0.989688,
+      "cfd_off_target_risk": 3.578,
+      "cfd_specificity_score": 0.965456,
+      "norm_cfd_specificity": 0.950191,
+      "balanced_score": 0.969939,
+      "gc_content": 0.4,
+      "off_target_count": 181,
+      "cfd_scoring_status": "COMPLETE"
+    },
+    {
+      "guide_id": "TP53_11911_-",
+      "guide_rna": "TTGGCTAGCCAGGAACATGG",
+      "deep_spcas9_score": 84.822945,
+      "norm_activity": 1.0,
+      "cfd_off_target_risk": 8.2602,
+      "cfd_specificity_score": 0.9237,
+      "norm_cfd_specificity": 0.889982,
+      "balanced_score": 0.944991,
+      "gc_content": 0.55,
+      "off_target_count": 158,
+      "cfd_scoring_status": "COMPLETE"
+    },
+    {
+      "guide_id": "TP53_559_-",
+      "guide_rna": "TGAGTTGAGTCCTCGAATCG",
+      "deep_spcas9_score": 71.826187,
+      "norm_activity": 0.847118,
+      "cfd_off_target_risk": 0.2242,
+      "cfd_specificity_score": 0.997763,
+      "norm_cfd_specificity": 0.996774,
+      "balanced_score": 0.921946,
+      "gc_content": 0.5,
+      "off_target_count": 38,
+      "cfd_scoring_status": "COMPLETE"
+    },
+    {
+      "guide_id": "TP53_2766_+",
+      "guide_rna": "GAGGACCGTCGCAATCTGAG",
+      "deep_spcas9_score": 72.208412,
+      "norm_activity": 0.851615,
+      "cfd_off_target_risk": 1.719,
+      "cfd_specificity_score": 0.983101,
+      "norm_cfd_specificity": 0.975633,
+      "balanced_score": 0.913624,
+      "gc_content": 0.6,
+      "off_target_count": 23,
+      "cfd_scoring_status": "COMPLETE"
+    },
+    {
+      "guide_id": "TP53_3053_-",
+      "guide_rna": "TAGGTTGCAGGCGACCCGCG",
+      "deep_spcas9_score": 61.429565,
+      "norm_activity": 0.724822,
+      "cfd_off_target_risk": 0.1281,
+      "cfd_specificity_score": 0.998721,
+      "norm_cfd_specificity": 0.998156,
+      "balanced_score": 0.861489,
+      "gc_content": 0.7,
+      "off_target_count": 11,
+      "cfd_scoring_status": "COMPLETE"
+    }
+  ],
+  "n_selected": 5,
+  "lp_track_a": {
+    "status": "optimal",
+    "objective_value_maximised": 4.681068,
+    "weights_used": {
+      "w1_activity": 0.5,
+      "w2_cfd_specificity": 0.5
+    },
+    "n_variables": 1648,
+    "k": 5,
+    "note": "LP RELAXATION x_i in [0,1]. NOT the binary MIP x_i in {0,1}. Fractional solutions reported exactly, never rounded.",
+    "solution_summary": {
+      "fully_selected_x_approx_1": 3,
+      "fractional_0_lt_x_lt_1": 2,
+      "fully_rejected_x_approx_0": 1643
+    },
+    "kkt_analysis": {
+      "mu_cardinality_dual": 0.913185,
+      "stationarity_max_residual": 0.0,
+      "cs_alpha_max": 3.73e-08,
+      "cs_beta_max": 1.96e-08,
+      "kkt_satisfied": true
+    },
+    "top_lp_variables": [
+      {
+        "guide_id": "TP53_11911_-",
+        "x_value": 1.0,
+        "norm_activity": 1.0,
+        "norm_cfd_specificity": 0.889982
+      },
+      {
+        "guide_id": "TP53_150_-",
+        "x_value": 1.0,
+        "norm_activity": 0.989688,
+        "norm_cfd_specificity": 0.950191
+      },
+      {
+        "guide_id": "TP53_2103_-",
+        "x_value": 0.999999,
+        "norm_activity": 0.919977,
+        "norm_cfd_specificity": 0.941161
+      },
+      {
+        "guide_id": "TP53_559_-",
+        "x_value": 0.999998,
+        "norm_activity": 0.847118,
+        "norm_cfd_specificity": 0.996774
+      },
+      {
+        "guide_id": "TP53_2766_+",
+        "x_value": 0.999991,
+        "norm_activity": 0.851615,
+        "norm_cfd_specificity": 0.975633
+      },
+      {
+        "guide_id": "TP53_16092_-",
+        "x_value": 0.0,
+        "norm_activity": 0.876723,
+        "norm_cfd_specificity": 0.940874
+      },
+      {
+        "guide_id": "TP53_22420_+",
+        "x_value": 0.0,
+        "norm_activity": 0.844304,
+        "norm_cfd_specificity": 0.97978
+      },
+      {
+        "guide_id": "TP53_20219_+",
+        "x_value": 0.0,
+        "norm_activity": 0.845446,
+        "norm_cfd_specificity": 0.968125
+      },
+      {
+        "guide_id": "TP53_14390_+",
+        "x_value": 0.0,
+        "norm_activity": 0.885229,
+        "norm_cfd_specificity": 0.927237
+      },
+      {
+        "guide_id": "TP53_9363_-",
+        "x_value": 0.0,
+        "norm_activity": 0.940639,
+        "norm_cfd_specificity": 0.867788
+      }
+    ]
+  },
+  "output_files": {
+    "feasible_candidates": "C:\\Users\\daksh\\Documents\\CRISPR-GuideRNA-Optimization\\results\\step10b_optimization\\TP53\\run1\\feasible_candidates.csv",
+    "excluded_candidates": "C:\\Users\\daksh\\Documents\\CRISPR-GuideRNA-Optimization\\results\\step10b_optimization\\TP53\\run1\\excluded_candidates.csv",
+    "pareto_front": "C:\\Users\\daksh\\Documents\\CRISPR-GuideRNA-Optimization\\results\\step10b_optimization\\TP53\\run1\\pareto_front.csv",
+    "weighted_sum": "C:\\Users\\daksh\\Documents\\CRISPR-GuideRNA-Optimization\\results\\step10b_optimization\\TP53\\run1\\weighted_sum_approximation.csv",
+    "selected_guides": "C:\\Users\\daksh\\Documents\\CRISPR-GuideRNA-Optimization\\results\\step10b_optimization\\TP53\\run1\\selected_guides.csv",
+    "pareto_plot": "C:\\Users\\daksh\\Documents\\CRISPR-GuideRNA-Optimization\\results\\step10b_optimization\\TP53\\run1\\pareto_front.png"
+  }
+}

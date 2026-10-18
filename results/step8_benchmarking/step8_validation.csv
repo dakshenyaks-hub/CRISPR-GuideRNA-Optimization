@@ -1,0 +1,11 @@
+Check,Status,Detail
+all_genes_processed,PASS,"Processed: ['BRCA1', 'EGFR', 'HBB', 'TP53']"
+same_feasible_set,PASS,All selected guides belong to their gene's feasible set
+one_guide_per_method,PASS,"Total rows: 16, expected: 16"
+selected_guides_exist,PASS,All selected guides found in feasible candidate set
+pareto_selected_in_pareto_set,PASS,All Pareto_Selected guides are Pareto-optimal
+equal_weight_reproduces_step7,PASS,TP53: True; HBB: True; EGFR: True; BRCA1: True
+weighted_sum_weights_sum_to_1,PASS,"Min sum: 1.0000, Max sum: 1.0000"
+no_nan_objectives,PASS,All E_hat and S_hat values are finite
+capped_guides_flagged,PASS,Off_Target_Capped flags match source data
+input_tables_unchanged,PASS,Original gRNA_features.csv files have 34 columns

@@ -1,0 +1,15 @@
+check_id,description,passed,details
+1,Exact mismatch penalties match CRISPOR reference,True,"rA:dA,pos1=1.000000 (expect 1.0); rU:dG,pos20=0.090909 (expect 0.090909)"
+2,Exact PAM penalties match CRISPOR reference,True,GG=1.0 (1.0); AG=0.259259 (0.259259); GA=0.069444 (0.069444)
+3,Mismatch table completeness (240 entries),True,Entries: 240
+4,Perfect match + GG PAM = 1.0,True,CFD_site=1.0
+5,Non-canonical AG PAM scores 0.259,True,CFD_site with AG PAM = 0.259259 (expect 0.259259)
+6,Unknown PAM (NN not in table) -> 0.0,True,CFD_site with NN PAM = 0.0
+7,Seed mismatch penalised more than distal,False,seed_CFD=0.7647 < distal_CFD=0.0000
+8,R_CFD aggregation (0.5 + 0.3 = 0.8),True,R_CFD = 0.8
+9,Censored guide: risk and specificity are NaN,True,"risk=nan, spec=nan"
+10,Censored guide: cfd_partial_risk is numeric (not NaN),True,cfd_partial_risk=5.0
+11,Complete guide with 0 off-targets: S_CFD=1.0,True,"S_CFD=1.0, R_CFD=0.0"
+12,"pam_key_from_genomic_pam: TGG->GG, AAG->AG, invalid->None",True,"TGG->GG, AAG->AG, empty->None, NNN->None"
+13,Coordinate-based on-target exclusion,True,"excluded=True, method=COORDINATE_MATCH, remaining=1"
+14,"cfd_partial_risk is a real CFD sum, not a raw count",True,"partial_risk=5.0 (5 * CFD_site=1.0 = 5.0, not raw count)"

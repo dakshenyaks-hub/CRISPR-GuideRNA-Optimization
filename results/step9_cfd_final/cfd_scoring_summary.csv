@@ -1,0 +1,5 @@
+gene,total_candidates,complete_cfd_scoring,censored_cfd_scoring,missing_cfd_risk_scores,n_sites_with_missing_pam,n_perfect_copy_loci_total,mean_cfd_off_target_risk,min_cfd_off_target_risk,max_cfd_off_target_risk,mean_cfd_specificity_score,min_cfd_specificity_score,max_cfd_specificity_score
+TP53,4398,1969,2429,2429,1065276,499428,1.0,1.0,1.0,0.9901,0.9901,0.9901
+HBB,540,416,124,124,14743,8323,1.0,1.0,1.0,0.9901,0.9901,0.9901
+EGFR,23934,19536,4398,4398,465606,288844,1.0,1.0,1.0,0.9901,0.9901,0.9901
+BRCA1,30489,7378,23111,23111,13365071,5145462,1.0,1.0,1.0,0.9901,0.9901,0.9901

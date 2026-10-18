@@ -1,0 +1,218 @@
+{
+  "timestamp": "2026-09-29T04:38:11.544678+00:00",
+  "configuration": {
+    "input_csv": "results/BRCA1/gRNA_features.csv",
+    "k": 1,
+    "gc_range": [
+      0.3,
+      0.7
+    ],
+    "max_homopolymer_run": 4,
+    "require_no_poly_t": true,
+    "mfe_threshold": null,
+    "capped_guide_policy": "retain",
+    "n_epsilon_steps": 50,
+    "n_weight_steps": 21
+  },
+  "filtering": {
+    "total_candidates": 15527,
+    "filters_applied": {
+      "nan_deep_spcas9": 1,
+      "gc_content_out_of_range": 2162,
+      "poly_t_terminator": 1572,
+      "homopolymer_run_exceeded": 2160
+    },
+    "off_target_capped_total": 8423,
+    "capped_guide_policy": "retain (censored: OT count is lower bound)",
+    "feasible_candidates": 11733,
+    "excluded_candidates": 3794,
+    "capped_in_feasible_set": 5955
+  },
+  "pareto_analysis": {
+    "method": "epsilon-constraint + direct dominance verification",
+    "n_pareto_optimal": 7,
+    "weighted_sum_note": "Weighted-sum is a SECONDARY method. It finds solutions on the convex hull of the Pareto front only and does NOT guarantee the complete non-dominated set.",
+    "weighted_sum_unique_solutions": 5
+  },
+  "selected_guides": [
+    {
+      "guide_id": "BRCA1_2088_+",
+      "guide_rna": "TCCGTGGCAACAGTAAAGCG",
+      "strand": "+",
+      "pam_sequence": "TGG",
+      "pam_position": 2088,
+      "gc_content": 0.55,
+      "deep_spcas9_score": 78.2163,
+      "norm_activity": 0.943864,
+      "off_target_count": 43,
+      "off_target_capped": false,
+      "off_target_count_note": "exact count",
+      "norm_specificity": 0.958877,
+      "folding_energy_kcal_mol": -0.1,
+      "max_homopolymer_run": 3,
+      "has_poly_t_terminator": false,
+      "balanced_score": 0.95137
+    }
+  ],
+  "lp_relaxation": {
+    "status": "optimal",
+    "objective_value": 0.95137,
+    "weights_used": {
+      "w1_activity": 0.5,
+      "w2_specificity": 0.5
+    },
+    "n_variables": 11733,
+    "k": 1,
+    "solution_summary": {
+      "fully_selected": 1,
+      "fully_rejected": 11732,
+      "fractional": 0
+    },
+    "kkt_analysis": {
+      "mu_cardinality_multiplier": 0.951361,
+      "mu_interpretation": "Selection threshold: guides with weighted cost c_i < -0.951361 are selected; those above are rejected.",
+      "stationarity_max_residual": 0.0,
+      "complementary_slackness_alpha_max": 3.8e-09,
+      "complementary_slackness_beta_max": 0.0,
+      "kkt_satisfied": true
+    },
+    "lagrangian_formulation": "L(x, mu, alpha, beta) = c^T x + mu(sum(x_i) - k) + sum(alpha_i(-x_i)) + sum(beta_i(x_i - 1))\nwhere mu in R (equality), alpha_i >= 0 (lower bound), beta_i >= 0 (upper bound)",
+    "note": "This is the CONTINUOUS LP relaxation (x_i in [0,1]). It does NOT directly produce a biologically valid binary guide selection. See Track B for the exact discrete Pareto analysis.",
+    "top_lp_variables": [
+      {
+        "guide_id": "BRCA1_2088_+",
+        "x_value": 0.999999,
+        "norm_activity": 0.943864,
+        "norm_specificity": 0.958877,
+        "cost_c_i": -0.95137,
+        "alpha_i": 0.0,
+        "beta_i": 1e-05
+      },
+      {
+        "guide_id": "BRCA1_46917_+",
+        "x_value": 1e-06,
+        "norm_activity": 0.92139,
+        "norm_specificity": 0.978937,
+        "cost_c_i": -0.950164,
+        "alpha_i": 0.001197,
+        "beta_i": 0.0
+      },
+      {
+        "guide_id": "BRCA1_2323_+",
+        "x_value": 0.0,
+        "norm_activity": 0.926392,
+        "norm_specificity": 0.947844,
+        "cost_c_i": -0.937118,
+        "alpha_i": 0.014243,
+        "beta_i": 0.0
+      },
+      {
+        "guide_id": "BRCA1_27410_-",
+        "x_value": 0.0,
+        "norm_activity": 0.907536,
+        "norm_specificity": 0.966901,
+        "cost_c_i": -0.937218,
+        "alpha_i": 0.014143,
+        "beta_i": 0.0
+      },
+      {
+        "guide_id": "BRCA1_87567_+",
+        "x_value": 0.0,
+        "norm_activity": 0.897457,
+        "norm_specificity": 0.97994,
+        "cost_c_i": -0.938698,
+        "alpha_i": 0.012662,
+        "beta_i": 0.0
+      },
+      {
+        "guide_id": "BRCA1_31665_-",
+        "x_value": 0.0,
+        "norm_activity": 0.988033,
+        "norm_specificity": 0.890672,
+        "cost_c_i": -0.939352,
+        "alpha_i": 0.012008,
+        "beta_i": 0.0
+      },
+      {
+        "guide_id": "BRCA1_2089_+",
+        "x_value": 0.0,
+        "norm_activity": 0.903194,
+        "norm_specificity": 0.952859,
+        "cost_c_i": -0.928026,
+        "alpha_i": 0.023334,
+        "beta_i": 0.0
+      },
+      {
+        "guide_id": "BRCA1_2188_-",
+        "x_value": 0.0,
+        "norm_activity": 0.923323,
+        "norm_specificity": 0.931795,
+        "cost_c_i": -0.927559,
+        "alpha_i": 0.023801,
+        "beta_i": 0.0
+      },
+      {
+        "guide_id": "BRCA1_25389_+",
+        "x_value": 0.0,
+        "norm_activity": 0.868877,
+        "norm_specificity": 0.973922,
+        "cost_c_i": -0.9214,
+        "alpha_i": 0.029961,
+        "beta_i": 0.0
+      },
+      {
+        "guide_id": "BRCA1_36742_+",
+        "x_value": 0.0,
+        "norm_activity": 0.859247,
+        "norm_specificity": 0.971916,
+        "cost_c_i": -0.915581,
+        "alpha_i": 0.035779,
+        "beta_i": 0.0
+      }
+    ]
+  },
+  "validation": {
+    "no_nan_objectives": {
+      "pass": true,
+      "detail": "NaN activity: 0, NaN off-target: 0"
+    },
+    "biological_constraints": {
+      "pass": true,
+      "detail": "GC: True, HR: True, PT: True, MFE: True"
+    },
+    "cardinality_k": {
+      "pass": true,
+      "detail": "k=1, selected=1, pareto_size=7"
+    },
+    "pareto_non_dominated": {
+      "pass": true,
+      "detail": "7/7 are non-dominated"
+    },
+    "objective_directions": {
+      "pass": true,
+      "detail": "norm_activity: higher=better (max), norm_specificity: higher=better (max)"
+    },
+    "normalisation_range": {
+      "pass": true,
+      "detail": "activity [0.0000, 1.0000], specificity [0.0000, 1.0000]"
+    },
+    "capped_ot_transparency": {
+      "pass": true,
+      "detail": "5955 capped guides in feasible set; policy: retain"
+    },
+    "_all_passed": true
+  },
+  "mathematical_note": {
+    "track_a": "LP relaxation (x in [0,1]): convex LP solved by CVXOPT for 23MAT204 demonstration",
+    "track_b": "Discrete binary selection (x in {0,1}): exact Pareto analysis by epsilon-constraint + dominance",
+    "separation": "Track A and Track B are separate analyses. The LP relaxation does NOT produce the binary guide selection. Rounding the LP solution is a heuristic, not a guarantee of optimality for the ILP."
+  },
+  "output_files": {
+    "feasible_candidates": "results\\BRCA1\\optimization\\feasible_candidates.csv",
+    "excluded_candidates": "results\\BRCA1\\optimization\\excluded_candidates.csv",
+    "pareto_front": "results\\BRCA1\\optimization\\pareto_front.csv",
+    "weighted_sum_approximation": "results\\BRCA1\\optimization\\weighted_sum_pareto_approximation.csv",
+    "selected_guides": "results\\BRCA1\\optimization\\selected_guides.csv",
+    "pareto_plot": "results\\BRCA1\\optimization\\pareto_front.png"
+  }
+}

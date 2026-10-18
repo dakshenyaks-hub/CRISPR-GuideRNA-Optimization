@@ -1,0 +1,17 @@
+Gene,Method,Guide_ID,Is_Pareto_Optimal
+TP53,Highest_DeepSpCas9,TP53_11911_-,True
+TP53,Lowest_OffTarget,TP53_1041_+,True
+TP53,Equal_Weight,TP53_11911_-,True
+TP53,Pareto_Selected,TP53_11911_-,True
+HBB,Highest_DeepSpCas9,HBB_3541_+,True
+HBB,Lowest_OffTarget,HBB_3457_-,True
+HBB,Equal_Weight,HBB_3541_+,True
+HBB,Pareto_Selected,HBB_3541_+,True
+EGFR,Highest_DeepSpCas9,EGFR_102720_-,True
+EGFR,Lowest_OffTarget,EGFR_196290_-,True
+EGFR,Equal_Weight,EGFR_100693_+,True
+EGFR,Pareto_Selected,EGFR_100693_+,True
+BRCA1,Highest_DeepSpCas9,BRCA1_112052_+,True
+BRCA1,Lowest_OffTarget,BRCA1_46082_+,True
+BRCA1,Equal_Weight,BRCA1_2088_+,True
+BRCA1,Pareto_Selected,BRCA1_2088_+,True

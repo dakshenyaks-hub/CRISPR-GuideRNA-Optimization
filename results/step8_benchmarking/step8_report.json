@@ -1,0 +1,653 @@
+{
+  "timestamp": "2026-09-29T04:57:55.127966+00:00",
+  "step": "Step 8 \u2014 Benchmarking and Comparative Evaluation",
+  "genes_evaluated": [
+    "TP53",
+    "HBB",
+    "EGFR",
+    "BRCA1"
+  ],
+  "methods_compared": [
+    {
+      "id": "Highest_DeepSpCas9",
+      "description": "Single-objective activity maximisation: select the feasible guide with the highest DeepSpCas9 score.",
+      "type": "single-objective"
+    },
+    {
+      "id": "Lowest_OffTarget",
+      "description": "Single-objective off-target minimisation: select the feasible guide with the lowest off_target_count. Tie-break: higher DeepSpCas9, then lexicographically smaller guide_id.",
+      "type": "single-objective"
+    },
+    {
+      "id": "Equal_Weight",
+      "description": "Weighted-sum scalarisation: select the feasible guide maximising 0.5*E_hat + 0.5*S_hat. This is a DEMONSTRATION decision rule.",
+      "type": "scalarisation"
+    },
+    {
+      "id": "Pareto_Selected",
+      "description": "Pareto-based: from the Pareto-optimal set, select the guide with the highest balanced score (0.5*E_hat + 0.5*S_hat). The equal-weight guide is only a representative decision rule applied to the Pareto set.",
+      "type": "multi-objective"
+    }
+  ],
+  "fairness_rule": "All methods select from the SAME feasible set for each gene. No method sees additional candidates. Comparison is methodologically fair.",
+  "benchmark_comparison": [
+    {
+      "Gene": "TP53",
+      "Method": "Highest_DeepSpCas9",
+      "Guide_ID": "TP53_11911_-",
+      "Guide_Sequence": "TTGGCTAGCCAGGAACATGG",
+      "Strand": "-",
+      "GC_Content": 0.55,
+      "DeepSpCas9": 84.8229,
+      "Off_Target_Count": 158,
+      "Off_Target_Capped": false,
+      "E_hat": 1.0,
+      "S_hat": 0.846928,
+      "Balanced_Score": 0.923464,
+      "Pareto_Status": true
+    },
+    {
+      "Gene": "TP53",
+      "Method": "Lowest_OffTarget",
+      "Guide_ID": "TP53_1041_+",
+      "Guide_Sequence": "TTAGCACCGCGGGTCGCTAC",
+      "Strand": "+",
+      "GC_Content": 0.65,
+      "DeepSpCas9": 46.416,
+      "Off_Target_Count": 6,
+      "Off_Target_Capped": false,
+      "E_hat": 0.548217,
+      "S_hat": 1.0,
+      "Balanced_Score": 0.774108,
+      "Pareto_Status": true
+    },
+    {
+      "Gene": "TP53",
+      "Method": "Equal_Weight",
+      "Guide_ID": "TP53_11911_-",
+      "Guide_Sequence": "TTGGCTAGCCAGGAACATGG",
+      "Strand": "-",
+      "GC_Content": 0.55,
+      "DeepSpCas9": 84.8229,
+      "Off_Target_Count": 158,
+      "Off_Target_Capped": false,
+      "E_hat": 1.0,
+      "S_hat": 0.846928,
+      "Balanced_Score": 0.923464,
+      "Pareto_Status": true
+    },
+    {
+      "Gene": "TP53",
+      "Method": "Pareto_Selected",
+      "Guide_ID": "TP53_11911_-",
+      "Guide_Sequence": "TTGGCTAGCCAGGAACATGG",
+      "Strand": "-",
+      "GC_Content": 0.55,
+      "DeepSpCas9": 84.8229,
+      "Off_Target_Count": 158,
+      "Off_Target_Capped": false,
+      "E_hat": 1.0,
+      "S_hat": 0.846928,
+      "Balanced_Score": 0.923464,
+      "Pareto_Status": true
+    },
+    {
+      "Gene": "HBB",
+      "Method": "Highest_DeepSpCas9",
+      "Guide_ID": "HBB_3541_+",
+      "Guide_Sequence": "TAAGTCCAACTACTAAACTG",
+      "Strand": "+",
+      "GC_Content": 0.35,
+      "DeepSpCas9": 81.7955,
+      "Off_Target_Count": 179,
+      "Off_Target_Capped": false,
+      "E_hat": 1.0,
+      "S_hat": 0.843621,
+      "Balanced_Score": 0.921811,
+      "Pareto_Status": true
+    },
+    {
+      "Gene": "HBB",
+      "Method": "Lowest_OffTarget",
+      "Guide_ID": "HBB_3457_-",
+      "Guide_Sequence": "GCGAGCTTAGTGATACTTGT",
+      "Strand": "-",
+      "GC_Content": 0.45,
+      "DeepSpCas9": 38.1138,
+      "Off_Target_Count": 27,
+      "Off_Target_Capped": false,
+      "E_hat": 0.460692,
+      "S_hat": 1.0,
+      "Balanced_Score": 0.730346,
+      "Pareto_Status": true
+    },
+    {
+      "Gene": "HBB",
+      "Method": "Equal_Weight",
+      "Guide_ID": "HBB_3541_+",
+      "Guide_Sequence": "TAAGTCCAACTACTAAACTG",
+      "Strand": "+",
+      "GC_Content": 0.35,
+      "DeepSpCas9": 81.7955,
+      "Off_Target_Count": 179,
+      "Off_Target_Capped": false,
+      "E_hat": 1.0,
+      "S_hat": 0.843621,
+      "Balanced_Score": 0.921811,
+      "Pareto_Status": true
+    },
+    {
+      "Gene": "HBB",
+      "Method": "Pareto_Selected",
+      "Guide_ID": "HBB_3541_+",
+      "Guide_Sequence": "TAAGTCCAACTACTAAACTG",
+      "Strand": "+",
+      "GC_Content": 0.35,
+      "DeepSpCas9": 81.7955,
+      "Off_Target_Count": 179,
+      "Off_Target_Capped": false,
+      "E_hat": 1.0,
+      "S_hat": 0.843621,
+      "Balanced_Score": 0.921811,
+      "Pareto_Status": true
+    },
+    {
+      "Gene": "EGFR",
+      "Method": "Highest_DeepSpCas9",
+      "Guide_ID": "EGFR_102720_-",
+      "Guide_Sequence": "TCAAGAGGAGAGGTGAACCA",
+      "Strand": "-",
+      "GC_Content": 0.5,
+      "DeepSpCas9": 84.0157,
+      "Off_Target_Count": 216,
+      "Off_Target_Capped": false,
+      "E_hat": 1.0,
+      "S_hat": 0.786145,
+      "Balanced_Score": 0.893072,
+      "Pareto_Status": true
+    },
+    {
+      "Gene": "EGFR",
+      "Method": "Lowest_OffTarget",
+      "Guide_ID": "EGFR_196290_-",
+      "Guide_Sequence": "GGTGCGGCGGGTTCCGATAT",
+      "Strand": "-",
+      "GC_Content": 0.65,
+      "DeepSpCas9": 34.7584,
+      "Off_Target_Count": 3,
+      "Off_Target_Capped": false,
+      "E_hat": 0.434821,
+      "S_hat": 1.0,
+      "Balanced_Score": 0.717411,
+      "Pareto_Status": true
+    },
+    {
+      "Gene": "EGFR",
+      "Method": "Equal_Weight",
+      "Guide_ID": "EGFR_100693_+",
+      "Guide_Sequence": "GTGCAGAGTGCCCTCAACGA",
+      "Strand": "+",
+      "GC_Content": 0.6,
+      "DeepSpCas9": 81.0126,
+      "Off_Target_Count": 61,
+      "Off_Target_Capped": false,
+      "E_hat": 0.965543,
+      "S_hat": 0.941767,
+      "Balanced_Score": 0.953655,
+      "Pareto_Status": true
+    },
+    {
+      "Gene": "EGFR",
+      "Method": "Pareto_Selected",
+      "Guide_ID": "EGFR_100693_+",
+      "Guide_Sequence": "GTGCAGAGTGCCCTCAACGA",
+      "Strand": "+",
+      "GC_Content": 0.6,
+      "DeepSpCas9": 81.0126,
+      "Off_Target_Count": 61,
+      "Off_Target_Capped": false,
+      "E_hat": 0.965543,
+      "S_hat": 0.941767,
+      "Balanced_Score": 0.953655,
+      "Pareto_Status": true
+    },
+    {
+      "Gene": "BRCA1",
+      "Method": "Highest_DeepSpCas9",
+      "Guide_ID": "BRCA1_112052_+",
+      "Guide_Sequence": "TCAAGGCGGACAGATCACTG",
+      "Strand": "+",
+      "GC_Content": 0.55,
+      "DeepSpCas9": 83.2726,
+      "Off_Target_Count": 999,
+      "Off_Target_Capped": true,
+      "E_hat": 1.0,
+      "S_hat": 0.0,
+      "Balanced_Score": 0.5,
+      "Pareto_Status": true
+    },
+    {
+      "Gene": "BRCA1",
+      "Method": "Lowest_OffTarget",
+      "Guide_ID": "BRCA1_46082_+",
+      "Guide_Sequence": "CGATTGCGTCGACGGAGACG",
+      "Strand": "+",
+      "GC_Content": 0.65,
+      "DeepSpCas9": 66.7364,
+      "Off_Target_Count": 2,
+      "Off_Target_Capped": false,
+      "E_hat": 0.816413,
+      "S_hat": 1.0,
+      "Balanced_Score": 0.908206,
+      "Pareto_Status": true
+    },
+    {
+      "Gene": "BRCA1",
+      "Method": "Equal_Weight",
+      "Guide_ID": "BRCA1_2088_+",
+      "Guide_Sequence": "TCCGTGGCAACAGTAAAGCG",
+      "Strand": "+",
+      "GC_Content": 0.55,
+      "DeepSpCas9": 78.2163,
+      "Off_Target_Count": 43,
+      "Off_Target_Capped": false,
+      "E_hat": 0.943864,
+      "S_hat": 0.958877,
+      "Balanced_Score": 0.95137,
+      "Pareto_Status": true
+    },
+    {
+      "Gene": "BRCA1",
+      "Method": "Pareto_Selected",
+      "Guide_ID": "BRCA1_2088_+",
+      "Guide_Sequence": "TCCGTGGCAACAGTAAAGCG",
+      "Strand": "+",
+      "GC_Content": 0.55,
+      "DeepSpCas9": 78.2163,
+      "Off_Target_Count": 43,
+      "Off_Target_Capped": false,
+      "E_hat": 0.943864,
+      "S_hat": 0.958877,
+      "Balanced_Score": 0.95137,
+      "Pareto_Status": true
+    }
+  ],
+  "pareto_membership": [
+    {
+      "Gene": "TP53",
+      "Method": "Highest_DeepSpCas9",
+      "Guide_ID": "TP53_11911_-",
+      "Is_Pareto_Optimal": true
+    },
+    {
+      "Gene": "TP53",
+      "Method": "Lowest_OffTarget",
+      "Guide_ID": "TP53_1041_+",
+      "Is_Pareto_Optimal": true
+    },
+    {
+      "Gene": "TP53",
+      "Method": "Equal_Weight",
+      "Guide_ID": "TP53_11911_-",
+      "Is_Pareto_Optimal": true
+    },
+    {
+      "Gene": "TP53",
+      "Method": "Pareto_Selected",
+      "Guide_ID": "TP53_11911_-",
+      "Is_Pareto_Optimal": true
+    },
+    {
+      "Gene": "HBB",
+      "Method": "Highest_DeepSpCas9",
+      "Guide_ID": "HBB_3541_+",
+      "Is_Pareto_Optimal": true
+    },
+    {
+      "Gene": "HBB",
+      "Method": "Lowest_OffTarget",
+      "Guide_ID": "HBB_3457_-",
+      "Is_Pareto_Optimal": true
+    },
+    {
+      "Gene": "HBB",
+      "Method": "Equal_Weight",
+      "Guide_ID": "HBB_3541_+",
+      "Is_Pareto_Optimal": true
+    },
+    {
+      "Gene": "HBB",
+      "Method": "Pareto_Selected",
+      "Guide_ID": "HBB_3541_+",
+      "Is_Pareto_Optimal": true
+    },
+    {
+      "Gene": "EGFR",
+      "Method": "Highest_DeepSpCas9",
+      "Guide_ID": "EGFR_102720_-",
+      "Is_Pareto_Optimal": true
+    },
+    {
+      "Gene": "EGFR",
+      "Method": "Lowest_OffTarget",
+      "Guide_ID": "EGFR_196290_-",
+      "Is_Pareto_Optimal": true
+    },
+    {
+      "Gene": "EGFR",
+      "Method": "Equal_Weight",
+      "Guide_ID": "EGFR_100693_+",
+      "Is_Pareto_Optimal": true
+    },
+    {
+      "Gene": "EGFR",
+      "Method": "Pareto_Selected",
+      "Guide_ID": "EGFR_100693_+",
+      "Is_Pareto_Optimal": true
+    },
+    {
+      "Gene": "BRCA1",
+      "Method": "Highest_DeepSpCas9",
+      "Guide_ID": "BRCA1_112052_+",
+      "Is_Pareto_Optimal": true
+    },
+    {
+      "Gene": "BRCA1",
+      "Method": "Lowest_OffTarget",
+      "Guide_ID": "BRCA1_46082_+",
+      "Is_Pareto_Optimal": true
+    },
+    {
+      "Gene": "BRCA1",
+      "Method": "Equal_Weight",
+      "Guide_ID": "BRCA1_2088_+",
+      "Is_Pareto_Optimal": true
+    },
+    {
+      "Gene": "BRCA1",
+      "Method": "Pareto_Selected",
+      "Guide_ID": "BRCA1_2088_+",
+      "Is_Pareto_Optimal": true
+    }
+  ],
+  "weighted_sum_coverage": [
+    {
+      "Gene": "TP53",
+      "Unique_Solutions": 3,
+      "Pareto_Recovered": 2,
+      "Total_Pareto": 9,
+      "Pareto_Coverage_Pct": 22.2
+    },
+    {
+      "Gene": "HBB",
+      "Unique_Solutions": 6,
+      "Pareto_Recovered": 6,
+      "Total_Pareto": 9,
+      "Pareto_Coverage_Pct": 66.7
+    },
+    {
+      "Gene": "EGFR",
+      "Unique_Solutions": 6,
+      "Pareto_Recovered": 5,
+      "Total_Pareto": 12,
+      "Pareto_Coverage_Pct": 41.7
+    },
+    {
+      "Gene": "BRCA1",
+      "Unique_Solutions": 5,
+      "Pareto_Recovered": 5,
+      "Total_Pareto": 7,
+      "Pareto_Coverage_Pct": 71.4
+    }
+  ],
+  "trade_off_analysis": {
+    "TP53": {
+      "Highest_DeepSpCas9_vs_Equal_Weight": {
+        "Delta_E_hat": 0.0,
+        "Delta_S_hat": 0.0,
+        "Delta_DeepSpCas9": 0.0,
+        "Delta_OffTarget": 0
+      },
+      "Lowest_OffTarget_vs_Equal_Weight": {
+        "Delta_E_hat": -0.451783,
+        "Delta_S_hat": 0.153072,
+        "Delta_DeepSpCas9": -38.4069,
+        "Delta_OffTarget": -152
+      },
+      "Pareto_Selected_vs_Equal_Weight": {
+        "Delta_E_hat": 0.0,
+        "Delta_S_hat": 0.0,
+        "Delta_DeepSpCas9": 0.0,
+        "Delta_OffTarget": 0
+      }
+    },
+    "HBB": {
+      "Highest_DeepSpCas9_vs_Equal_Weight": {
+        "Delta_E_hat": 0.0,
+        "Delta_S_hat": 0.0,
+        "Delta_DeepSpCas9": 0.0,
+        "Delta_OffTarget": 0
+      },
+      "Lowest_OffTarget_vs_Equal_Weight": {
+        "Delta_E_hat": -0.539308,
+        "Delta_S_hat": 0.156379,
+        "Delta_DeepSpCas9": -43.6817,
+        "Delta_OffTarget": -152
+      },
+      "Pareto_Selected_vs_Equal_Weight": {
+        "Delta_E_hat": 0.0,
+        "Delta_S_hat": 0.0,
+        "Delta_DeepSpCas9": 0.0,
+        "Delta_OffTarget": 0
+      }
+    },
+    "EGFR": {
+      "Highest_DeepSpCas9_vs_Equal_Weight": {
+        "Delta_E_hat": 0.034457,
+        "Delta_S_hat": -0.155622,
+        "Delta_DeepSpCas9": 3.0031,
+        "Delta_OffTarget": 155
+      },
+      "Lowest_OffTarget_vs_Equal_Weight": {
+        "Delta_E_hat": -0.530722,
+        "Delta_S_hat": 0.058233,
+        "Delta_DeepSpCas9": -46.2542,
+        "Delta_OffTarget": -58
+      },
+      "Pareto_Selected_vs_Equal_Weight": {
+        "Delta_E_hat": 0.0,
+        "Delta_S_hat": 0.0,
+        "Delta_DeepSpCas9": 0.0,
+        "Delta_OffTarget": 0
+      }
+    },
+    "BRCA1": {
+      "Highest_DeepSpCas9_vs_Equal_Weight": {
+        "Delta_E_hat": 0.056136,
+        "Delta_S_hat": -0.958877,
+        "Delta_DeepSpCas9": 5.0563,
+        "Delta_OffTarget": 956
+      },
+      "Lowest_OffTarget_vs_Equal_Weight": {
+        "Delta_E_hat": -0.127451,
+        "Delta_S_hat": 0.041123,
+        "Delta_DeepSpCas9": -11.4799,
+        "Delta_OffTarget": -41
+      },
+      "Pareto_Selected_vs_Equal_Weight": {
+        "Delta_E_hat": 0.0,
+        "Delta_S_hat": 0.0,
+        "Delta_DeepSpCas9": 0.0,
+        "Delta_OffTarget": 0
+      }
+    }
+  },
+  "summary_metrics": [
+    {
+      "Gene": "TP53",
+      "Feasible_Guides": 2791,
+      "Pareto_Guides": 9,
+      "WeightedSum_Unique_Solutions": 3,
+      "WeightedSum_Pareto_Coverage": 22.2,
+      "HighestActivity_E_hat": 1.0,
+      "HighestActivity_S_hat": 0.846928,
+      "LowestOT_E_hat": 0.548217,
+      "LowestOT_S_hat": 1.0,
+      "EqualWeight_E_hat": 1.0,
+      "EqualWeight_S_hat": 0.846928,
+      "ParetoSelected_E_hat": 1.0,
+      "ParetoSelected_S_hat": 0.846928
+    },
+    {
+      "Gene": "HBB",
+      "Feasible_Guides": 407,
+      "Pareto_Guides": 9,
+      "WeightedSum_Unique_Solutions": 6,
+      "WeightedSum_Pareto_Coverage": 66.7,
+      "HighestActivity_E_hat": 1.0,
+      "HighestActivity_S_hat": 0.843621,
+      "LowestOT_E_hat": 0.460692,
+      "LowestOT_S_hat": 1.0,
+      "EqualWeight_E_hat": 1.0,
+      "EqualWeight_S_hat": 0.843621,
+      "ParetoSelected_E_hat": 1.0,
+      "ParetoSelected_S_hat": 0.843621
+    },
+    {
+      "Gene": "EGFR",
+      "Feasible_Guides": 18169,
+      "Pareto_Guides": 12,
+      "WeightedSum_Unique_Solutions": 6,
+      "WeightedSum_Pareto_Coverage": 41.7,
+      "HighestActivity_E_hat": 1.0,
+      "HighestActivity_S_hat": 0.786145,
+      "LowestOT_E_hat": 0.434821,
+      "LowestOT_S_hat": 1.0,
+      "EqualWeight_E_hat": 0.965543,
+      "EqualWeight_S_hat": 0.941767,
+      "ParetoSelected_E_hat": 0.965543,
+      "ParetoSelected_S_hat": 0.941767
+    },
+    {
+      "Gene": "BRCA1",
+      "Feasible_Guides": 11733,
+      "Pareto_Guides": 7,
+      "WeightedSum_Unique_Solutions": 5,
+      "WeightedSum_Pareto_Coverage": 71.4,
+      "HighestActivity_E_hat": 1.0,
+      "HighestActivity_S_hat": 0.0,
+      "LowestOT_E_hat": 0.816413,
+      "LowestOT_S_hat": 1.0,
+      "EqualWeight_E_hat": 0.943864,
+      "EqualWeight_S_hat": 0.958877,
+      "ParetoSelected_E_hat": 0.943864,
+      "ParetoSelected_S_hat": 0.958877
+    }
+  ],
+  "reproducibility_check": {
+    "TP53": {
+      "step7_guide": "TP53_11911_-",
+      "step8_equal_weight": "TP53_11911_-",
+      "match": true
+    },
+    "HBB": {
+      "step7_guide": "HBB_3541_+",
+      "step8_equal_weight": "HBB_3541_+",
+      "match": true
+    },
+    "EGFR": {
+      "step7_guide": "EGFR_100693_+",
+      "step8_equal_weight": "EGFR_100693_+",
+      "match": true
+    },
+    "BRCA1": {
+      "step7_guide": "BRCA1_2088_+",
+      "step8_equal_weight": "BRCA1_2088_+",
+      "match": true
+    }
+  },
+  "capped_guide_observations": [
+    "  BRCA1/Highest_DeepSpCas9: BRCA1_112052_+ \u2014 Selected guide has censored off-target count (\u2265999). Reported OT=999 is a lower bound."
+  ],
+  "validation": {
+    "total_checks": 10,
+    "passed": 10,
+    "all_passed": true,
+    "checks": [
+      {
+        "Check": "all_genes_processed",
+        "Status": "PASS",
+        "Detail": "Processed: ['BRCA1', 'EGFR', 'HBB', 'TP53']"
+      },
+      {
+        "Check": "same_feasible_set",
+        "Status": "PASS",
+        "Detail": "All selected guides belong to their gene's feasible set"
+      },
+      {
+        "Check": "one_guide_per_method",
+        "Status": "PASS",
+        "Detail": "Total rows: 16, expected: 16"
+      },
+      {
+        "Check": "selected_guides_exist",
+        "Status": "PASS",
+        "Detail": "All selected guides found in feasible candidate set"
+      },
+      {
+        "Check": "pareto_selected_in_pareto_set",
+        "Status": "PASS",
+        "Detail": "All Pareto_Selected guides are Pareto-optimal"
+      },
+      {
+        "Check": "equal_weight_reproduces_step7",
+        "Status": "PASS",
+        "Detail": "TP53: True; HBB: True; EGFR: True; BRCA1: True"
+      },
+      {
+        "Check": "weighted_sum_weights_sum_to_1",
+        "Status": "PASS",
+        "Detail": "Min sum: 1.0000, Max sum: 1.0000"
+      },
+      {
+        "Check": "no_nan_objectives",
+        "Status": "PASS",
+        "Detail": "All E_hat and S_hat values are finite"
+      },
+      {
+        "Check": "capped_guides_flagged",
+        "Status": "PASS",
+        "Detail": "Off_Target_Capped flags match source data"
+      },
+      {
+        "Check": "input_tables_unchanged",
+        "Status": "PASS",
+        "Detail": "Original gRNA_features.csv files have 34 columns"
+      }
+    ]
+  },
+  "plots_generated": [
+    "C:\\Users\\daksh\\Documents\\CRISPR-GuideRNA-Optimization\\results\\step8_benchmarking\\plots\\TP53_benchmark.png",
+    "C:\\Users\\daksh\\Documents\\CRISPR-GuideRNA-Optimization\\results\\step8_benchmarking\\plots\\HBB_benchmark.png",
+    "C:\\Users\\daksh\\Documents\\CRISPR-GuideRNA-Optimization\\results\\step8_benchmarking\\plots\\EGFR_benchmark.png",
+    "C:\\Users\\daksh\\Documents\\CRISPR-GuideRNA-Optimization\\results\\step8_benchmarking\\plots\\BRCA1_benchmark.png",
+    "C:\\Users\\daksh\\Documents\\CRISPR-GuideRNA-Optimization\\results\\step8_benchmarking\\plots\\combined_benchmark.png"
+  ],
+  "mathematical_conclusions": [
+    "Different selection strategies produce different guides under the same feasible set.",
+    "The activity-maximising strategy achieves the highest E_hat but may sacrifice specificity (S_hat).",
+    "The off-target-minimising strategy achieves the highest S_hat but may sacrifice activity (E_hat).",
+    "Equal-weight scalarisation and Pareto-based selection both seek balanced solutions.",
+    "The weighted-sum sweep recovers only a subset of the observed Pareto solutions.",
+    "Multi-objective optimisation explicitly preserves the activity\u2013specificity trade-off frontier."
+  ],
+  "limitations": [
+    "Off-target count is a computational Bowtie hit count, not a validated biological specificity score.",
+    "Capped off-target counts (\u2265999) are censored/lower-bound computational values.",
+    "Equal weighting (0.5/0.5) is a demonstration preference, not universally optimal.",
+    "Computational comparison does not establish experimental biological efficacy.",
+    "Pareto membership indicates mathematical non-dominance, not biological superiority.",
+    "This benchmark compares selection rules, not prediction models."
+  ],
+  "conclusion": "The benchmark demonstrates how single-objective and multi-objective selection rules produce different solutions under the same feasible candidate set, and quantifies the activity\u2013off-target trade-off represented by the proposed Pareto framework."
+}

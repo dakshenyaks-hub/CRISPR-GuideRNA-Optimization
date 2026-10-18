@@ -1,0 +1,5 @@
+gene,total_candidates,complete_cfd_scoring,censored_cfd_scoring,missing_cfd_risk_scores,unique_risk_values,unique_spec_values,mean_cfd_off_target_risk,median_cfd_off_target_risk,min_cfd_off_target_risk,max_cfd_off_target_risk,std_cfd_off_target_risk,mean_cfd_specificity_score,median_cfd_specificity_score,min_cfd_specificity_score,max_cfd_specificity_score,std_cfd_specificity_score,zero_risk_count_R0,low_risk_count_R_0_to_10,moderate_risk_count_R_10_to_30,high_risk_count_R_gt_30
+TP53,4398,1969,2429,2429,1960,1958,13.9479,10.5574,0.0,226.29,13.7566,0.8871,0.9045,0.3065,1.0,0.0826,1,936,862,170
+HBB,540,416,124,124,416,416,15.2598,12.1428,0.5502,71.2844,10.8398,0.8746,0.8917,0.5838,0.9945,0.0754,0,172,202,42
+EGFR,23934,19536,4398,4398,18527,18337,15.1289,11.8878,0.0,256.6963,12.9385,0.8775,0.8938,0.2804,1.0,0.082,2,8202,9152,2180
+BRCA1,30489,7378,23111,23111,6916,6894,21.7155,14.3578,0.0218,456.9335,27.0546,0.8449,0.8744,0.1796,0.9998,0.1156,0,2472,3490,1416

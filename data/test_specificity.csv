@@ -1,0 +1,6 @@
+guide_rna,pam_sequence,pam_position,strand,guide_length,length,gc_content,frac_A,frac_C,frac_G,frac_T,has_poly_t_terminator,max_homopolymer_run,starts_with_g,melting_temp_c,delta_g_kcal_mol,secondary_structure,folding_energy_kcal_mol,paired_fraction,doench2016_proxy_score,off_target_count,mismatch_score
+GCTACCTGCTCCCTGGACGG,TGG,15,-,20,20,0.7,0.1,0.4,0.3,0.2,False,3,True,58.51,-27.996,((.....))...........,-1.0,0.2,0.79,145,2.979
+GCAGCTACCTGCTCCCTGGA,CGG,18,-,20,20,0.65,0.15,0.4,0.25,0.2,False,3,True,57.77,-27.47,((((....))))........,-3.9,0.4,0.705,407,2.921
+CCCAGCAGCTACCTGCTCCC,TGG,22,-,20,20,0.7,0.15,0.55,0.15,0.15,False,3,False,58.78,-28.043,...(((((....)))))...,-4.9,0.5,0.69,565,2.945
+AAAGTCTAGAGCCACCGTCC,AGG,24,+,20,20,0.55,0.3,0.35,0.2,0.15,False,3,False,53.18,-25.343,....................,0.0,0.0,0.735,124,2.96
+AAGTCTAGAGCCACCGTCCA,GGG,25,+,20,20,0.55,0.3,0.35,0.2,0.15,False,2,False,54.24,-25.749,....................,0.0,0.0,0.635,79,2.949
