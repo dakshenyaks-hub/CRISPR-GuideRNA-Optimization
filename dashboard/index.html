@@ -5699,7 +5699,7 @@
                     } catch (_) {}
                 }
 
-                if (!data || data.status === 'unsupported' || data.status === 'error' || !data.dynamic_scoring_supported) {
+                if (!data || data.status === 'unsupported' || data.status === 'error') {
                     const msg = (data && data.message)
                         ? data.message
                         : `Dynamic scoring is not supported for novel gene '${gene}'. Validated DeepSpCas9 activity and CFD off-target predictions are currently available for precomputed research genes (TP53, HBB, EGFR, BRCA1).`;
