@@ -5771,19 +5771,19 @@
         }
 
         function loadResolvedGeneIntoWorkflow() {
-            if (!_lastResolvedData) return;
-            const gene = _lastResolvedData.gene_symbol.toUpperCase();
-            if (!['TP53', 'HBB', 'EGFR', 'BRCA1'].includes(gene) && !_lastResolvedData.dynamic_scoring_supported) {
-                showToast(`Dynamic scoring is not supported for ${gene}. Please select a validated gene (TP53, HBB, EGFR, BRCA1).`);
-                return;
-            }
-            registerCustomGeneData(_lastResolvedData);
-            handleGeneChange(gene);
-            enterResearchLab();
-            showToast(`🚀 Loaded ${gene} into active research workflow! Starting at Stage 1.`);
+        if (!_lastResolvedData || _lastResolvedData.status !== 'success') {
+            showToast('No successful gene analysis is available.');
+            return;
         }
 
-        // Initial Boot
+        const gene = _lastResolvedData.gene_symbol.toUpperCase();
+        registerCustomGeneData(_lastResolvedData);
+        handleGeneChange(gene);
+        enterResearchLab();
+        showToast(`🚀 Loaded ${gene} into active research workflow! Starting at Stage 1.`);
+    }
+
+    // Initial Boot
         window.addEventListener('DOMContentLoaded', loadData);
         window.addEventListener('load', () => setTimeout(triggerKaTeXMath, 100));
     </script>
