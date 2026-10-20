@@ -45,6 +45,7 @@ REPORTS_DIR = PROJECT_ROOT / "reports"
 STEP10A_DIR = RESULTS_DIR / "step10a_cfd_rescored"
 STEP10B_DIR = RESULTS_DIR / "step10b_optimization"
 STEP11_DIR = RESULTS_DIR / "step11_sensitivity"
+DYNAMIC_RESULTS_DIR = RESULTS_DIR / "dynamic"
 
 CFD_RESCORED_CSV = STEP10A_DIR / "cfd_guide_features.csv"
 STEP10B_SUMMARY_JSON = REPORTS_DIR / "step10b_optimization_summary.json"
@@ -424,6 +425,27 @@ class PipelineController:
                 report["per_gene"][gene] = {"passed": False, "error": str(exc)}
 
         return report
+
+    @classmethod
+    def list_dynamic_genes(cls) -> List[str]:
+        """Lists any novel genes analyzed via the dynamic pipeline."""
+        if not DYNAMIC_RESULTS_DIR.exists():
+            return []
+        genes = []
+        for p in DYNAMIC_RESULTS_DIR.iterdir():
+            if p.is_dir() and (p / "dynamic_run_summary.json").exists():
+                genes.append(p.name)
+        return sorted(genes)
+
+    @classmethod
+    def get_dynamic_gene_summary(cls, gene: str) -> Optional[Dict[str, Any]]:
+        """Loads the dynamic run summary for a novel gene if available."""
+        gene = gene.upper()
+        summary_file = DYNAMIC_RESULTS_DIR / gene / "dynamic_run_summary.json"
+        if not summary_file.exists():
+            return None
+        with open(summary_file, "r", encoding="utf-8") as fp:
+            return json.load(fp)
 
 
 if __name__ == "__main__":

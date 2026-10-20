@@ -29,14 +29,17 @@ import tests.test_pipeline_controller as t3
 import tests.test_ncbi_sequence_provider as t4
 import tests.test_optimization_lab as t5
 import tests.test_validation_dashboard as t6
+import tests.test_dynamic_pipeline as t7
 
 def run_test_class(cls):
     obj = cls()
     if hasattr(obj, 'setUp'):
         obj.setUp()
-    methods = [m for m in dir(obj) if m.startswith('test_')]
+    methods = [m for m in dir(obj) if m.startswith('test_') and callable(getattr(obj, m))]
     for m in methods:
         getattr(obj, m)()
+    if hasattr(obj, 'tearDown'):
+        obj.tearDown()
 
 def main():
     print("=== Running Unit Tests in tests/test_cfd_score.py ===")
@@ -93,7 +96,13 @@ def main():
     run_test_class(t6.TestValidationDataIntegrity)
     print("  [PASS] TestValidationDataIntegrity (4-Gene Authoritative Baseline & Honest Statuses)")
 
-    print("\nALL UNIT, E2E, PIPELINE CONTROLLER, NCBI PROVIDER, OPTIMIZATION LAB, AND VALIDATION DASHBOARD TESTS PASSED SUCCESSFULLY!")
+    print("\n=== Running Dynamic Gene Pipeline Tests in tests/test_dynamic_pipeline.py ===")
+    run_test_class(t7.TestDynamicPipelineModule)
+    print("  [PASS] TestDynamicPipelineModule (PAM generation, DeepSpCas9, isolation, resource checks)")
+    run_test_class(t7.TestDashboardDynamicIntegration)
+    print("  [PASS] TestDashboardDynamicIntegration (API status, FASTA input, baseline preservation)")
+
+    print("\nALL UNIT, E2E, PIPELINE CONTROLLER, NCBI PROVIDER, OPTIMIZATION LAB, VALIDATION DASHBOARD, AND DYNAMIC PIPELINE TESTS PASSED SUCCESSFULLY!")
 
 if __name__ == "__main__":
     main()

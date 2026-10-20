@@ -32,6 +32,7 @@ from dataclasses import dataclass, field, asdict
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
+import socket
 from xml.etree import ElementTree
 
 from Bio import Entrez, SeqIO
@@ -53,6 +54,9 @@ _DEFAULT_CACHE_DIR = Path("data/reference_sequences")
 # Flanking bases to add upstream/downstream of the gene body.
 # This ensures we capture promoter-proximal PAM sites and full UTRs.
 _FLANKING_BP = 2000
+
+# Default network timeout for NCBI queries in seconds
+_DEFAULT_TIMEOUT = 15.0
 
 # We restrict to Homo sapiens for now.
 _ORGANISM = "Homo sapiens"
@@ -146,9 +150,12 @@ class NCBISequenceProvider:
         cache_dir: Optional[Path | str] = None,
         email: Optional[str] = None,
         api_key: Optional[str] = None,
+        timeout: Optional[float] = None,
     ) -> None:
         self.cache_dir = Path(cache_dir or _DEFAULT_CACHE_DIR).resolve()
         self.cache_dir.mkdir(parents=True, exist_ok=True)
+        self.timeout = float(timeout) if timeout is not None else _DEFAULT_TIMEOUT
+        socket.setdefaulttimeout(self.timeout)
 
         Entrez.email = email or _ENTREZ_EMAIL
         Entrez.tool = _ENTREZ_TOOL
@@ -264,19 +271,19 @@ class NCBISequenceProvider:
         return result
 
     def _entrez_call(self, func, **kwargs):
-        """Wrapper for Entrez calls with error handling."""
+        """Wrapper for Entrez calls with error handling and network timeout."""
         try:
             handle = func(**kwargs)
             return handle
         except Exception as exc:
-            error_msg = str(exc)
+            error_msg = str(exc).lower()
             if any(
-                term in error_msg.lower()
-                for term in ["urlopen", "urlError", "timeout", "connection", "http"]
+                term in error_msg
+                for term in ["urlopen", "urlerror", "timeout", "timed out", "connection", "http"]
             ):
                 raise NCBINetworkError(
-                    f"Could not connect to NCBI. Please check your internet "
-                    f"connection and try again.\nDetails: {error_msg}"
+                    "Could not connect to NCBI or request timed out. Please check your internet "
+                    "connection and try again."
                 ) from exc
             raise
 

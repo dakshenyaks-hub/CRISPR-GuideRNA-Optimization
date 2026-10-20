@@ -56,3 +56,7 @@ __pycache__/
 
 # External model repository kept locally
 models/Paired-Library/
+
+# User-generated dynamic pipeline results
+results/dynamic/*/
+!results/dynamic/VEGFA/

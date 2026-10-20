@@ -1,0 +1,145 @@
+{
+  "gene_symbol": "VEGFA",
+  "input_type": "gene_symbol",
+  "timestamp": "2026-10-19T15:12:59.989895+00:00",
+  "stages": [
+    {
+      "stage": "sequence_resolution",
+      "status": "completed",
+      "message": "Resolved VEGFA from NCBI Entrez: Homo sapiens, GRCh38, NC_000006.12, 20,277 bp",
+      "data": {
+        "ncbi_gene_id": "7422",
+        "accession": "NC_000006.12",
+        "organism": "Homo sapiens",
+        "assembly": "GRCh38",
+        "sequence_length": 20277
+      }
+    },
+    {
+      "stage": "candidate_generation",
+      "status": "completed",
+      "message": "Generated 4,199 candidate guide RNAs",
+      "data": {
+        "total_candidates": 4199,
+        "plus_strand": 2226,
+        "minus_strand": 1973
+      }
+    },
+    {
+      "stage": "feature_extraction",
+      "status": "completed",
+      "message": "Extracted features for 4,199 candidates. Bowtie genome alignment active (deferred to CFD stage for single-pass PAM extraction).",
+      "data": {
+        "n_features": 33,
+        "bowtie_available": true,
+        "single_pass_deferred": true,
+        "gc_mean": 0.5936
+      }
+    },
+    {
+      "stage": "deepspcas9_scoring",
+      "status": "completed",
+      "message": "DeepSpCas9 predicted 4195/4199 candidates. Score range: [-7.6284, 84.9079]",
+      "data": {
+        "total_candidates": 4199,
+        "successfully_predicted": 4195,
+        "failed_edge_cases": 4,
+        "min": -7.6284,
+        "max": 84.9079,
+        "mean": 42.876,
+        "median": 45.1288,
+        "std": 16.6373
+      }
+    },
+    {
+      "stage": "cfd_scoring",
+      "status": "completed",
+      "message": "CFD scored 3685/4199 guides completely using GRCh38 reference",
+      "data": {
+        "n_scored": 3685,
+        "n_total": 4199
+      }
+    },
+    {
+      "stage": "optimization",
+      "status": "completed",
+      "message": "Feasibility: 2810/4199 candidates pass constraints. Pareto front: 7 non-dominated guides. Selected: 5 top balanced guides using cfd_specificity_score.",
+      "data": {
+        "total_candidates": 4199,
+        "filters_applied": {
+          "nan_deep_spcas9": 4,
+          "gc_content_out_of_range": 628,
+          "poly_t_terminator": 162,
+          "homopolymer_run_exceeded": 517,
+          "off_target_capped_excluded": 310
+        },
+        "off_target_capped_total": 514,
+        "capped_guide_policy": "exclude",
+        "feasible_candidates": 2810,
+        "excluded_candidates": 1389,
+        "capped_in_feasible_set": 0,
+        "pareto_front_size": 7,
+        "selected_count": 5,
+        "specificity_metric": "cfd_specificity_score",
+        "has_cfd_specificity": "True"
+      }
+    }
+  ],
+  "metadata": {
+    "gene_symbol": "VEGFA",
+    "ncbi_gene_id": "7422",
+    "organism": "Homo sapiens",
+    "assembly": "GRCh38",
+    "chromosome": "6",
+    "genomic_accession": "NC_000006.12",
+    "strand": "plus",
+    "gene_start": 43770211,
+    "gene_stop": 43786487,
+    "retrieved_start": 43768211,
+    "retrieved_stop": 43788487,
+    "sequence_length": 20277,
+    "source": "ncbi_entrez"
+  },
+  "overview": {
+    "gene_symbol": "VEGFA",
+    "ncbi_gene_id": "7422",
+    "organism": "Homo sapiens",
+    "assembly": "GRCh38",
+    "chromosome": "6",
+    "genomic_accession": "NC_000006.12",
+    "strand": "plus",
+    "gene_start": 43770211,
+    "gene_stop": 43786487,
+    "retrieved_start": 43768211,
+    "retrieved_stop": 43788487,
+    "sequence_length": 20277,
+    "source": "ncbi_entrez",
+    "total_candidates": 4199,
+    "plus_strand": 2226,
+    "minus_strand": 1973,
+    "mean_gc": 0.59,
+    "mean_tm": 55.46,
+    "mean_delta_g": -26.41,
+    "mean_mfe": -2.24,
+    "deep_mean": 42.88,
+    "deep_min": -7.63,
+    "deep_max": 84.91,
+    "deep_median": 45.13,
+    "complete_searches": 3685,
+    "censored_searches": 514,
+    "max_cfd_risk": 48.68,
+    "feasible": 2810,
+    "feasible_candidates": 2810,
+    "excluded": 1389,
+    "pareto": 7,
+    "pareto_front_size": 7,
+    "selected": 5,
+    "selected_guide_ids": [
+      "VEGFA_11896_-",
+      "VEGFA_6357_-",
+      "VEGFA_14105_-",
+      "VEGFA_264_+",
+      "VEGFA_1028_+"
+    ]
+  }
+}

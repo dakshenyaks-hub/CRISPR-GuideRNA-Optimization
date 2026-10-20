@@ -2316,8 +2316,8 @@
                     <div class="ncbi-fetch-header">
                         <div class="ncbi-fetch-icon">🔍</div>
                         <div>
-                            <div class="ncbi-fetch-title">Retrieve Any Human Gene via NCBI</div>
-                            <div class="ncbi-fetch-subtitle">Fetches genomic DNA from GRCh38 via NCBI Entrez, extracts gRNAs, computes features & executes complete optimization workflow</div>
+                            <div class="ncbi-fetch-title">Gene Sequence & Optimization Status</div>
+                            <div class="ncbi-fetch-subtitle">Validated DeepSpCas9 on-target and CFD off-target predictions are precomputed for research genes (TP53, HBB, EGFR, BRCA1). Dynamic novel gene scoring is disabled.</div>
                         </div>
                     </div>
 
@@ -2333,7 +2333,7 @@
                             spellcheck="false"
                         />
                         <button class="btn-ncbi-lookup" id="btn-ncbi-lookup" onclick="resolveCustomGene()">
-                            🔬 Lookup & Optimize Gene
+                            🔬 Check / Select Gene
                         </button>
                     </div>
 
@@ -3744,9 +3744,19 @@
             }
         }
 
-        // Helper to get verified or dynamic gene metadata safely
+        function fmtVal(val, digits = null, suffix = '') {
+            if (val === null || val === undefined || val === '' || Number.isNaN(Number(val))) return '—';
+            const num = Number(val);
+            if (digits !== null) {
+                return num.toFixed(digits) + suffix;
+            }
+            return num.toLocaleString() + suffix;
+        }
+
+        // Helper to get verified or dynamic gene metadata safely without synthetic fallback metrics
         function getGeneMeta(gene) {
             if (!gene) gene = currentGene || 'TP53';
+            gene = gene.toUpperCase();
             if (GENE_VERIFIED_META[gene]) {
                 return GENE_VERIFIED_META[gene];
             }
@@ -3754,69 +3764,69 @@
                 const gInfo = dashboardData.genes[gene];
                 const ov = gInfo.overview || gInfo.meta || {};
                 return {
-                    name: ov.name || ov.description || `${gene} (Homo sapiens)`,
-                    accession: ov.accession || ov.genomic_accession || 'NC_000000.0',
-                    assembly: ov.assembly || 'GRCh38.p14',
-                    chromosome: ov.chromosome || '1',
-                    strand: ov.strand || '+',
-                    gene_start: ov.gene_start || 1000000,
-                    gene_stop: ov.gene_stop || 1050000,
-                    retrieved_start: ov.retrieved_start || ov.gene_start || 1000000,
-                    retrieved_stop: ov.retrieved_stop || ov.gene_stop || 1050000,
-                    sequence_length: ov.sequence_length || 50000,
-                    total_candidates: ov.total_candidates || (gInfo.feasible_sample ? gInfo.feasible_sample.length : 1000),
-                    plus_strand: ov.plus_strand || Math.round((ov.total_candidates || 1000) / 2),
-                    minus_strand: ov.minus_strand || Math.round((ov.total_candidates || 1000) / 2),
-                    mean_gc: ov.mean_gc || 50.0,
-                    mean_tm: ov.mean_tm || 52.0,
-                    mean_delta_g: ov.mean_delta_g || -24.0,
-                    mean_mfe: ov.mean_mfe || -1.6,
-                    deep_mean: ov.deep_mean || 40.0,
-                    deep_min: ov.deep_min || -5.0,
-                    deep_max: ov.deep_max || 85.0,
-                    deep_median: ov.deep_median || 41.0,
-                    complete_searches: ov.complete_searches || 800,
-                    censored_searches: ov.censored_searches || 200,
-                    max_cfd_risk: ov.max_cfd_risk || 3.5,
-                    feasible: ov.feasible || (gInfo.feasible_sample ? gInfo.feasible_sample.length : 750),
-                    excluded: ov.excluded || 250,
-                    pareto: ov.pareto || (gInfo.pareto_front ? gInfo.pareto_front.length : 8),
-                    selected: ov.selected || (gInfo.selected_guides ? gInfo.selected_guides.length : 5)
+                    name: ov.name || ov.description || `${gene}`,
+                    accession: ov.accession || ov.genomic_accession || null,
+                    assembly: ov.assembly || null,
+                    chromosome: ov.chromosome ? String(ov.chromosome) : null,
+                    strand: ov.strand || null,
+                    gene_start: ov.gene_start ?? null,
+                    gene_stop: ov.gene_stop ?? null,
+                    retrieved_start: ov.retrieved_start ?? ov.gene_start ?? null,
+                    retrieved_stop: ov.retrieved_stop ?? ov.gene_stop ?? null,
+                    sequence_length: ov.sequence_length ?? null,
+                    total_candidates: ov.total_candidates ?? (gInfo.feasible_sample ? gInfo.feasible_sample.length : null),
+                    plus_strand: ov.plus_strand ?? null,
+                    minus_strand: ov.minus_strand ?? null,
+                    mean_gc: ov.mean_gc ?? null,
+                    mean_tm: ov.mean_tm ?? null,
+                    mean_delta_g: ov.mean_delta_g ?? null,
+                    mean_mfe: ov.mean_mfe ?? null,
+                    deep_mean: ov.deep_mean ?? null,
+                    deep_min: ov.deep_min ?? null,
+                    deep_max: ov.deep_max ?? null,
+                    deep_median: ov.deep_median ?? null,
+                    complete_searches: ov.complete_searches ?? null,
+                    censored_searches: ov.censored_searches ?? null,
+                    max_cfd_risk: ov.max_cfd_risk ?? null,
+                    feasible: ov.feasible ?? (gInfo.feasible_sample ? gInfo.feasible_sample.length : null),
+                    excluded: ov.excluded ?? null,
+                    pareto: ov.pareto ?? (gInfo.pareto_front ? gInfo.pareto_front.length : null),
+                    selected: ov.selected ?? (gInfo.selected_guides ? gInfo.selected_guides.length : null)
                 };
             }
             return {
-                name: `${gene} (Human Target Gene)`,
-                accession: 'NC_000000.0',
-                assembly: 'GRCh38.p14',
-                chromosome: '1',
-                strand: '+',
-                gene_start: 1000000,
-                gene_stop: 1050000,
-                retrieved_start: 1000000,
-                retrieved_stop: 1050000,
-                sequence_length: 50000,
-                total_candidates: 2500,
-                plus_strand: 1250,
-                minus_strand: 1250,
-                mean_gc: 50.0,
-                mean_tm: 52.0,
-                mean_delta_g: -24.0,
-                mean_mfe: -1.6,
-                deep_mean: 40.0,
-                deep_min: -5.0,
-                deep_max: 85.0,
-                deep_median: 41.0,
-                complete_searches: 2000,
-                censored_searches: 500,
-                max_cfd_risk: 3.5,
-                feasible: 1800,
-                excluded: 700,
-                pareto: 8,
-                selected: 5
+                name: `${gene}`,
+                accession: null,
+                assembly: null,
+                chromosome: null,
+                strand: null,
+                gene_start: null,
+                gene_stop: null,
+                retrieved_start: null,
+                retrieved_stop: null,
+                sequence_length: null,
+                total_candidates: null,
+                plus_strand: null,
+                minus_strand: null,
+                mean_gc: null,
+                mean_tm: null,
+                mean_delta_g: null,
+                mean_mfe: null,
+                deep_mean: null,
+                deep_min: null,
+                deep_max: null,
+                deep_median: null,
+                complete_searches: null,
+                censored_searches: null,
+                max_cfd_risk: null,
+                feasible: null,
+                excluded: null,
+                pareto: null,
+                selected: null
             };
         }
 
-        // Guarantee candidate data is 100% available and registered for any gene
+        // Guarantee candidate data is available for supported genes without synthesizing proxy data
         function ensureGeneData(gene) {
             if (!gene) gene = currentGene || 'TP53';
             gene = gene.toUpperCase();
@@ -3833,10 +3843,13 @@
                 return dashboardData.genes[gene];
             }
 
-            // Otherwise generate complete candidate dataset immediately
-            const generated = generateClientFallbackGeneData(gene);
-            registerCustomGeneData(generated);
-            return dashboardData.genes[gene];
+            // For unvalidated genes, do NOT synthesize fake proxy data
+            if (!['TP53', 'HBB', 'EGFR', 'BRCA1'].includes(gene)) {
+                console.warn(`Dynamic scoring is not supported for ${gene}. Proxy calculations are disabled.`);
+                return null;
+            }
+
+            return dashboardData.genes[gene] || null;
         }
 
         // Target Gene Change Handler
@@ -4039,22 +4052,22 @@
                             </div>
                             <div class="spec-card">
                                 <div class="spec-label">NCBI Accession</div>
-                                <div class="spec-value">${meta.accession}</div>
+                                <div class="spec-value">${meta.accession || '—'}</div>
                                 <div class="spec-sub">Homo sapiens (TaxID: 9606)</div>
                             </div>
                             <div class="spec-card">
                                 <div class="spec-label">Genome Assembly</div>
-                                <div class="spec-value">${meta.assembly}</div>
-                                <div class="spec-sub">Chr ${meta.chromosome} (${meta.strand} strand)</div>
+                                <div class="spec-value">${meta.assembly || '—'}</div>
+                                <div class="spec-sub">Chr ${meta.chromosome || '—'} (${meta.strand || '—'} strand)</div>
                             </div>
                             <div class="spec-card">
                                 <div class="spec-label">Sequence Length</div>
-                                <div class="spec-value">${meta.sequence_length.toLocaleString()} bp</div>
-                                <div class="spec-sub">Region: ${meta.gene_start.toLocaleString()} – ${meta.gene_stop.toLocaleString()}</div>
+                                <div class="spec-value">${fmtVal(meta.sequence_length, null, ' bp')}</div>
+                                <div class="spec-sub">Region: ${fmtVal(meta.gene_start)} – ${fmtVal(meta.gene_stop)}</div>
                             </div>
                         </div>
                         <div class="scientific-note-card">
-                            <strong>Reference Genome Verification:</strong> Reference sequence for target gene <strong>${currentGene}</strong> is confirmed against assembly <strong>${meta.assembly}</strong> on chromosome ${meta.chromosome}. Native sequence window encompasses ${meta.sequence_length.toLocaleString()} nucleotides.
+                            <strong>Reference Genome Verification:</strong> Reference sequence for target gene <strong>${currentGene}</strong> is confirmed against assembly <strong>${meta.assembly || '—'}</strong> on chromosome ${meta.chromosome || '—'}. Native sequence window encompasses ${fmtVal(meta.sequence_length, null, ' nucleotides')}.
                         </div>
                         <div style="background: var(--bg-body); border: 1px dashed var(--border-medium); border-radius: var(--radius-md); padding: 0.85rem 1.15rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
                             <div style="font-size: 0.84rem; color: var(--text-secondary);">
@@ -4067,12 +4080,12 @@
                     `;
                     populateResultSummary(
                         'Target Sequence Loaded',
-                        `✓ Target sequence loaded successfully.\n✓ Reference genome identified (${meta.assembly}, Chr ${meta.chromosome}, ${meta.sequence_length.toLocaleString()} bp).`,
+                        `✓ Target sequence loaded successfully.\n✓ Reference genome identified (${meta.assembly || '—'}, Chr ${meta.chromosome || '—'}, ${fmtVal(meta.sequence_length, null, ' bp')}).`,
                         [
-                            { label: 'Assembly', val: meta.assembly },
-                            { label: 'Chromosome', val: `Chr ${meta.chromosome}` },
-                            { label: 'Sequence Length', val: `${meta.sequence_length.toLocaleString()} bp` },
-                            { label: 'Strand Orientation', val: meta.strand }
+                            { label: 'Assembly', val: meta.assembly || '—' },
+                            { label: 'Chromosome', val: meta.chromosome ? `Chr ${meta.chromosome}` : '—' },
+                            { label: 'Sequence Length', val: fmtVal(meta.sequence_length, null, ' bp') },
+                            { label: 'Strand Orientation', val: meta.strand || '—' }
                         ]
                     );
                     break;
@@ -4101,12 +4114,12 @@
                             </div>
                             <div class="spec-card">
                                 <div class="spec-label">Candidate Count</div>
-                                <div class="spec-value" style="color: var(--teal-accent);">${meta.total_candidates.toLocaleString()}</div>
+                                <div class="spec-value" style="color: var(--teal-accent);">${fmtVal(meta.total_candidates)}</div>
                                 <div class="spec-sub">Exact verified guides</div>
                             </div>
                         </div>
                         <div class="scientific-note-card">
-                            <strong>gRNA Scanning Protocol:</strong> Scanned both forward and reverse complement strands of the ${meta.sequence_length.toLocaleString()} bp target locus for 20-nt protospacer sequences immediately preceding canonical 5'-NGG-3' PAM motifs.
+                            <strong>gRNA Scanning Protocol:</strong> Scanned both forward and reverse complement strands of the ${fmtVal(meta.sequence_length, null, ' bp')} target locus for 20-nt protospacer sequences immediately preceding canonical 5'-NGG-3' PAM motifs.
                         </div>
                     `;
                     auxBox.innerHTML = `
@@ -4116,11 +4129,11 @@
                     `;
                     populateResultSummary(
                         'gRNA Generation Complete',
-                        `✓ gRNA generation complete. Generated ${meta.total_candidates.toLocaleString()} candidate guide RNAs across both strands for ${currentGene}.`,
+                        `✓ gRNA generation complete. Generated ${fmtVal(meta.total_candidates)} candidate guide RNAs across both strands for ${currentGene}.`,
                         [
-                            { label: 'Total Candidates', val: meta.total_candidates.toLocaleString() },
-                            { label: 'Plus Strand (+)', val: meta.plus_strand.toLocaleString() },
-                            { label: 'Minus Strand (-)', val: meta.minus_strand.toLocaleString() },
+                            { label: 'Total Candidates', val: fmtVal(meta.total_candidates) },
+                            { label: 'Plus Strand (+)', val: fmtVal(meta.plus_strand) },
+                            { label: 'Minus Strand (-)', val: fmtVal(meta.minus_strand) },
                             { label: 'Guide Length', val: '100% 20-nt' }
                         ]
                     );
@@ -4135,22 +4148,22 @@
                         <div class="spec-grid">
                             <div class="spec-card">
                                 <div class="spec-label">GC Content</div>
-                                <div class="spec-value">${meta.mean_gc.toFixed(1)}%</div>
+                                <div class="spec-value">${fmtVal(meta.mean_gc, 1, '%')}</div>
                                 <div class="spec-sub">Feasible window: 30% – 70%</div>
                             </div>
                             <div class="spec-card">
                                 <div class="spec-label">Melting Temp (Tm)</div>
-                                <div class="spec-value">${meta.mean_tm.toFixed(1)} °C</div>
+                                <div class="spec-value">${fmtVal(meta.mean_tm, 1, ' °C')}</div>
                                 <div class="spec-sub">Nearest-neighbor duplex model</div>
                             </div>
                             <div class="spec-card">
                                 <div class="spec-label">Hybridization ΔG</div>
-                                <div class="spec-value">${meta.mean_delta_g.toFixed(1)} kcal/mol</div>
+                                <div class="spec-value">${fmtVal(meta.mean_delta_g, 1, ' kcal/mol')}</div>
                                 <div class="spec-sub">DNA-RNA binding energy</div>
                             </div>
                             <div class="spec-card">
                                 <div class="spec-label">Folding Energy (MFE)</div>
-                                <div class="spec-value">${meta.mean_mfe.toFixed(2)} kcal/mol</div>
+                                <div class="spec-value">${fmtVal(meta.mean_mfe, 2, ' kcal/mol')}</div>
                                 <div class="spec-sub">ViennaRNA secondary structure</div>
                             </div>
                         </div>
@@ -4165,11 +4178,11 @@
                     setTimeout(renderStage3MiniChart, 50);
                     populateResultSummary(
                         'Features Extracted',
-                        `✓ Features extracted.\n✓ ${meta.total_candidates.toLocaleString()} candidates processed across thermodynamic, structural, and composition metrics.`,
+                        `✓ Features extracted.\n✓ ${fmtVal(meta.total_candidates)} candidates processed across thermodynamic, structural, and composition metrics.`,
                         [
-                            { label: 'Candidates Processed', val: meta.total_candidates.toLocaleString() },
-                            { label: 'Mean GC Content', val: `${meta.mean_gc.toFixed(1)}%` },
-                            { label: 'Mean Tm', val: `${meta.mean_tm.toFixed(1)} °C` },
+                            { label: 'Candidates Processed', val: fmtVal(meta.total_candidates) },
+                            { label: 'Mean GC Content', val: fmtVal(meta.mean_gc, 1, '%') },
+                            { label: 'Mean Tm', val: fmtVal(meta.mean_tm, 1, ' °C') },
                             { label: 'Structure Analysis', val: 'Complete' }
                         ]
                     );
@@ -4189,18 +4202,18 @@
                             </div>
                             <div class="spec-card">
                                 <div class="spec-label">Guides Scored</div>
-                                <div class="spec-value">${meta.total_candidates.toLocaleString()}</div>
+                                <div class="spec-value">${fmtVal(meta.total_candidates)}</div>
                                 <div class="spec-sub">100% protospacers evaluated</div>
                             </div>
                             <div class="spec-card">
                                 <div class="spec-label">Activity Range</div>
-                                <div class="spec-value">[${meta.deep_min.toFixed(1)}, ${meta.deep_max.toFixed(1)}]%</div>
+                                <div class="spec-value">[${fmtVal(meta.deep_min, 1)}, ${fmtVal(meta.deep_max, 1)}]%</div>
                                 <div class="spec-sub">Predicted indel frequency</div>
                             </div>
                             <div class="spec-card">
                                 <div class="spec-label">Mean Activity</div>
-                                <div class="spec-value" style="color: var(--brand-primary);">${meta.deep_mean.toFixed(1)}%</div>
-                                <div class="spec-sub">Median: ${meta.deep_median.toFixed(1)}%</div>
+                                <div class="spec-value" style="color: var(--brand-primary);">${fmtVal(meta.deep_mean, 1, '%')}</div>
+                                <div class="spec-sub">Median: ${fmtVal(meta.deep_median, 1, '%')}</div>
                             </div>
                         </div>
                         <div class="scientific-note-card">
@@ -4214,11 +4227,11 @@
                     `;
                     populateResultSummary(
                         'DeepSpCas9 Cleavage Activity Computed',
-                        `✓ DeepSpCas9 on-target cleavage activity computed for all ${meta.total_candidates.toLocaleString()} candidate guides.`,
+                        `✓ DeepSpCas9 on-target cleavage activity computed for all ${fmtVal(meta.total_candidates)} candidate guides.`,
                         [
-                            { label: 'Guides Scored', val: meta.total_candidates.toLocaleString() },
-                            { label: 'Mean Activity', val: `${meta.deep_mean.toFixed(2)}%` },
-                            { label: 'Activity Range', val: `${meta.deep_min.toFixed(1)}% to ${meta.deep_max.toFixed(1)}%` },
+                            { label: 'Guides Scored', val: fmtVal(meta.total_candidates) },
+                            { label: 'Mean Activity', val: fmtVal(meta.deep_mean, 2, '%') },
+                            { label: 'Activity Range', val: `${fmtVal(meta.deep_min, 1)}% to ${fmtVal(meta.deep_max, 1)}%` },
                             { label: 'Model Status', val: 'Verified Inference' }
                         ]
                     );
@@ -4238,17 +4251,17 @@
                             </div>
                             <div class="spec-card">
                                 <div class="spec-label">Guides Analyzed</div>
-                                <div class="spec-value">${meta.total_candidates.toLocaleString()}</div>
+                                <div class="spec-value">${fmtVal(meta.total_candidates)}</div>
                                 <div class="spec-sub">100% genome-wide coverage</div>
                             </div>
                             <div class="spec-card">
                                 <div class="spec-label">Complete Searches</div>
-                                <div class="spec-value" style="color: var(--emerald-accent);">${meta.complete_searches.toLocaleString()}</div>
+                                <div class="spec-value" style="color: var(--emerald-accent);">${fmtVal(meta.complete_searches)}</div>
                                 <div class="spec-sub">Exhaustive alignments</div>
                             </div>
                             <div class="spec-card">
                                 <div class="spec-label">Censored Searches</div>
-                                <div class="spec-value" style="color: var(--amber-accent);">${meta.censored_searches.toLocaleString()}</div>
+                                <div class="spec-value" style="color: var(--amber-accent);">${fmtVal(meta.censored_searches)}</div>
                                 <div class="spec-sub">Truncated Bowtie threshold</div>
                             </div>
                         </div>
@@ -4283,10 +4296,10 @@
                         'Off-Target Analysis Complete',
                         `✓ Bowtie alignment and CFD scoring complete across human genome GRCh38.`,
                         [
-                            { label: 'Guides Analyzed', val: meta.total_candidates.toLocaleString() },
+                            { label: 'Guides Analyzed', val: fmtVal(meta.total_candidates) },
                             { label: 'Alignment Status', val: 'Bowtie Complete' },
-                            { label: 'Complete Searches', val: meta.complete_searches.toLocaleString() },
-                            { label: 'Censored Searches', val: meta.censored_searches.toLocaleString() }
+                            { label: 'Complete Searches', val: fmtVal(meta.complete_searches) },
+                            { label: 'Censored Searches', val: fmtVal(meta.censored_searches) }
                         ]
                     );
                     break;
@@ -4313,37 +4326,37 @@
                         <div class="funnel-vertical-container">
                             <div class="funnel-step-box" style="background: #f8fafc; border-left: 5px solid #64748b;">
                                 <span>Total Candidates</span>
-                                <span class="funnel-count">${meta.total_candidates.toLocaleString()}</span>
+                                <span class="funnel-count">${fmtVal(meta.total_candidates)}</span>
                             </div>
                             <div class="funnel-step-arrow">&darr;</div>
                             <div class="funnel-step-box" style="background: #fef2f2; border-left: 5px solid #ef4444;">
                                 <span>Biological Filters (GC 30-70%, Poly-T, Homopolymer &le; 4)</span>
-                                <span class="funnel-count" style="color: #ef4444;">-${(meta.excluded - meta.censored_searches).toLocaleString()}</span>
+                                <span class="funnel-count" style="color: #ef4444;">-${meta.excluded != null && meta.censored_searches != null ? fmtVal(meta.excluded - meta.censored_searches) : '—'}</span>
                             </div>
                             <div class="funnel-step-arrow">&darr;</div>
                             <div class="funnel-step-box" style="background: #fffbeb; border-left: 5px solid #f59e0b;">
                                 <span>CFD Completeness (Exclusion of Truncated Bowtie Searches)</span>
-                                <span class="funnel-count" style="color: #d97706;">-${meta.censored_searches.toLocaleString()}</span>
+                                <span class="funnel-count" style="color: #d97706;">-${fmtVal(meta.censored_searches)}</span>
                             </div>
                             <div class="funnel-step-arrow">&darr;</div>
                             <div class="funnel-step-box" style="background: #ecfdf5; border-left: 5px solid #10b981;">
                                 <span style="color: #166534; font-weight: 700;">Feasible Candidates</span>
-                                <span class="funnel-count" style="color: #166534;">${meta.feasible.toLocaleString()} (${(meta.feasible / meta.total_candidates * 100).toFixed(1)}% Yield)</span>
+                                <span class="funnel-count" style="color: #166534;">${fmtVal(meta.feasible)} (${meta.feasible != null && meta.total_candidates ? (meta.feasible / meta.total_candidates * 100).toFixed(1) + '%' : '—'} Yield)</span>
                             </div>
                         </div>
 
                         <div class="scientific-note-card">
-                            <strong>Verified Feasibility Math:</strong> For target ${currentGene}: ${meta.total_candidates.toLocaleString()} total candidates &rarr; ${meta.feasible.toLocaleString()} feasible candidates (${meta.excluded.toLocaleString()} excluded). Exact verified counts match research baseline.
+                            <strong>Verified Feasibility Math:</strong> For target ${currentGene}: ${fmtVal(meta.total_candidates)} total candidates &rarr; ${fmtVal(meta.feasible)} feasible candidates (${fmtVal(meta.excluded)} excluded).
                         </div>
                     `;
                     populateResultSummary(
                         'Feasibility Filtering Complete',
-                        `✓ Biological feasibility filters applied.\n✓ Filtered ${meta.total_candidates.toLocaleString()} candidates &rarr; ${meta.feasible.toLocaleString()} feasible candidates (${(meta.feasible / meta.total_candidates * 100).toFixed(1)}% yield).`,
+                        `✓ Biological feasibility filters applied.\n✓ Filtered ${fmtVal(meta.total_candidates)} candidates &rarr; ${fmtVal(meta.feasible)} feasible candidates (${meta.feasible != null && meta.total_candidates ? (meta.feasible / meta.total_candidates * 100).toFixed(1) + '%' : '—'} yield).`,
                         [
-                            { label: 'Total Input', val: meta.total_candidates.toLocaleString() },
-                            { label: 'Excluded Candidates', val: meta.excluded.toLocaleString() },
-                            { label: 'Feasible Set', val: meta.feasible.toLocaleString() },
-                            { label: 'Feasible Yield', val: `${(meta.feasible / meta.total_candidates * 100).toFixed(1)}%` }
+                            { label: 'Total Input', val: fmtVal(meta.total_candidates) },
+                            { label: 'Excluded Candidates', val: fmtVal(meta.excluded) },
+                            { label: 'Feasible Set', val: fmtVal(meta.feasible) },
+                            { label: 'Feasible Yield', val: meta.feasible != null && meta.total_candidates ? (meta.feasible / meta.total_candidates * 100).toFixed(1) + '%' : '—' }
                         ]
                     );
                     break;
@@ -4382,7 +4395,7 @@
                                     x_i \in \{0, 1\} \quad \sum_{i \in \mathcal{F}} x_i = K = 5
                                 </div>
                                 <p style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5;">
-                                    Direct non-dominated frontier mapping and balanced scalarization utility ($w_1 = 0.5, w_2 = 0.5$) identifying ${meta.pareto} verified Pareto-optimal designs.
+                                    Direct non-dominated frontier mapping and balanced scalarization utility ($w_1 = 0.5, w_2 = 0.5$) identifying ${fmtVal(meta.pareto)} verified Pareto-optimal designs.
                                 </p>
                             </div>
                         </div>
@@ -4390,7 +4403,7 @@
                         <div class="spec-grid" style="margin-top: 1rem;">
                             <div class="spec-card">
                                 <div class="spec-label">Feasible Candidates</div>
-                                <div class="spec-value" style="color: var(--brand-primary);">${meta.feasible.toLocaleString()}</div>
+                                <div class="spec-value" style="color: var(--brand-primary);">${fmtVal(meta.feasible)}</div>
                                 <div class="spec-sub">Decision variables</div>
                             </div>
                             <div class="spec-card">
@@ -4400,7 +4413,7 @@
                             </div>
                             <div class="spec-card">
                                 <div class="spec-label">Pareto Frontier Size</div>
-                                <div class="spec-value" style="color: var(--indigo-accent);">${meta.pareto} Designs</div>
+                                <div class="spec-value" style="color: var(--indigo-accent);">${fmtVal(meta.pareto)} Designs</div>
                                 <div class="spec-sub">Non-dominated solutions</div>
                             </div>
                             <div class="spec-card">
@@ -4412,11 +4425,11 @@
                     `;
                     populateResultSummary(
                         'Optimization Complete',
-                        `✓ Mathematical optimization complete across ${meta.feasible.toLocaleString()} feasible candidates.\n✓ Solved Track A convex LP relaxation and Track B discrete Pareto frontier (${meta.pareto} Pareto designs).`,
+                        `✓ Mathematical optimization complete across ${fmtVal(meta.feasible)} feasible candidates.\n✓ Solved Track A convex LP relaxation and Track B discrete Pareto frontier (${fmtVal(meta.pareto)} Pareto designs).`,
                         [
-                            { label: 'Feasible Candidates', val: meta.feasible.toLocaleString() },
+                            { label: 'Feasible Candidates', val: fmtVal(meta.feasible) },
                             { label: 'LP Solver Status', val: 'Optimal (Convex)' },
-                            { label: 'Pareto Optimal Set', val: `${meta.pareto} Designs` },
+                            { label: 'Pareto Optimal Set', val: `${fmtVal(meta.pareto)} Designs` },
                             { label: 'Portfolio Constraint', val: 'K = 5 Guides' }
                         ]
                     );
@@ -4430,7 +4443,7 @@
                     contentEl.innerHTML = `
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
                             <span style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 600;">
-                                Verified Frontier: <strong>${meta.pareto} Non-Dominated Solutions</strong>
+                                Verified Frontier: <strong>${fmtVal(meta.pareto)} Non-Dominated Solutions</strong>
                             </span>
                             <button class="btn-copy-small" onclick="toggleParetoAxisScale()">
                                 ${isNormalizedScale ? 'Switch to Raw Scale' : 'Switch to Normalized Scale'}
@@ -4444,10 +4457,10 @@
                     setTimeout(renderStageParetoPlot, 50);
                     populateResultSummary(
                         'Pareto Frontier Verified',
-                        `✓ Pareto analysis complete. Identified ${meta.pareto} non-dominated trade-off designs for ${currentGene}.`,
+                        `✓ Pareto analysis complete. Identified ${fmtVal(meta.pareto)} non-dominated trade-off designs for ${currentGene}.`,
                         [
-                            { label: 'Feasible Pool', val: meta.feasible.toLocaleString() },
-                            { label: 'Pareto Front Size', val: `${meta.pareto} Guides` },
+                            { label: 'Feasible Pool', val: fmtVal(meta.feasible) },
+                            { label: 'Pareto Front Size', val: `${fmtVal(meta.pareto)} Guides` },
                             { label: 'Selected Guides', val: '5 Guides' },
                             { label: 'Dominance Proof', val: '100% Non-Dominated' }
                         ]
@@ -5569,103 +5582,9 @@
         }
 
         function generateClientFallbackGeneData(geneSymbol) {
-            geneSymbol = geneSymbol.toUpperCase();
-            const chromosomes = ['1', '2', '3', '7', '11', '12', '17', 'X'];
-            const chr = chromosomes[Math.abs(hashString(geneSymbol)) % chromosomes.length];
-            const seqLen = 12000 + (Math.abs(hashString(geneSymbol + '_len')) % 45000);
-            const totalCandidates = Math.round(seqLen * 0.155);
-            const plusStrand = Math.round(totalCandidates * 0.51);
-            const minusStrand = totalCandidates - plusStrand;
-            const feasibleCount = Math.round(totalCandidates * 0.46);
-            const excludedCount = totalCandidates - feasibleCount;
-
-            // Generate synthetic realistic candidate guides
-            const feasibleSample = [];
-            const bases = ['A', 'C', 'G', 'T'];
-            for (let i = 0; i < Math.min(120, feasibleCount); i++) {
-                let seq = '';
-                for (let b = 0; b < 20; b++) {
-                    seq += bases[Math.floor(Math.random() * 4)];
-                }
-                const pos = Math.round((seqLen / 120) * i + 50);
-                const strand = i % 2 === 0 ? '+' : '-';
-                const gc = (seq.split('G').length - 1 + seq.split('C').length - 1) / 20.0;
-                const act = 35.0 + Math.random() * 48.0;
-                const risk = 0.5 + Math.random() * 3.5;
-                const spec = 100.0 / (100.0 + risk);
-                feasibleSample.push({
-                    guide_id: `${geneSymbol}_${pos}_${strand}`,
-                    guide_rna: seq,
-                    pam_sequence: 'AGG',
-                    pam_position: pos,
-                    strand: strand,
-                    gc_content: gc,
-                    melting_temp_c: 50.0 + gc * 15.0,
-                    delta_g_kcal_mol: -20.0 - gc * 8.0,
-                    folding_energy_kcal_mol: -1.0 - Math.random() * 1.5,
-                    deep_spcas9_score: act,
-                    cfd_off_target_risk: risk,
-                    cfd_specificity_score: spec,
-                    norm_activity: (act - 35.0) / 48.0,
-                    norm_cfd_specificity: (spec - 0.95) / 0.05,
-                    balanced_score: 0.5 * ((act - 35.0) / 48.0) + 0.5 * ((spec - 0.95) / 0.05),
-                    secondary_structure: '....................',
-                    off_targets_0mm: 0,
-                    off_targets_1mm: risk > 2 ? 1 : 0,
-                    off_targets_2mm: Math.round(risk * 2),
-                    off_targets_3mm: Math.round(risk * 40 + 30)
-                });
-            }
-
-            const sortedByScore = [...feasibleSample].sort((a, b) => b.balanced_score - a.balanced_score);
-            const selectedGuides = sortedByScore.slice(0, 5);
-            const paretoFront = sortedByScore.slice(0, 8);
-
-            const overview = {
-                gene_symbol: geneSymbol,
-                name: `${geneSymbol} proto-oncogene / therapeutic target (Homo sapiens)`,
-                ncbi_gene_id: 'NCBI_' + (Math.abs(hashString(geneSymbol)) % 90000 + 10000),
-                organism: 'Homo sapiens',
-                assembly: 'GRCh38.p14',
-                chromosome: chr,
-                accession: `NC_00000${chr}.11`,
-                strand: Math.random() > 0.5 ? 'plus' : 'minus',
-                gene_start: 15000000 + Math.abs(hashString(geneSymbol)) % 5000000,
-                gene_stop: 15000000 + Math.abs(hashString(geneSymbol)) % 5000000 + seqLen,
-                sequence_length: seqLen,
-                total_candidates: totalCandidates,
-                plus_strand: plusStrand,
-                minus_strand: minusStrand,
-                mean_gc: 49.5,
-                mean_tm: 52.1,
-                mean_delta_g: -24.2,
-                mean_mfe: -1.6,
-                deep_mean: 39.8,
-                deep_min: -8.5,
-                deep_max: 84.1,
-                deep_median: 41.2,
-                complete_searches: Math.round(totalCandidates * 0.65),
-                censored_searches: Math.round(totalCandidates * 0.35),
-                max_cfd_risk: 3.85,
-                feasible: feasibleCount,
-                excluded: excludedCount,
-                pareto: 8,
-                selected: 5
-            };
-
-            return {
-                status: 'success',
-                gene_symbol: geneSymbol,
-                overview: overview,
-                meta: overview,
-                feasible_sample: feasibleSample,
-                pareto_front: paretoFront,
-                selected_guides: selectedGuides,
-                total_candidates: totalCandidates,
-                plus_strand: plusStrand,
-                minus_strand: minusStrand,
-                note: `Genomic sequence modeled for ${geneSymbol} against GRCh38.p14.`
-            };
+            // Disabled: synthetic proxy scores are forbidden and must not be presented as predictions
+            console.warn(`Dynamic scoring is not supported for ${geneSymbol}. Synthetic fallback disabled.`);
+            return null;
         }
 
         function hashString(str) {
@@ -5681,34 +5600,34 @@
             const gene = data.gene_symbol.toUpperCase();
             const ov = data.overview || data.meta || data;
             GENE_VERIFIED_META[gene] = {
-                name: ov.name || ov.description || `${gene} (Homo sapiens)`,
-                accession: ov.accession || ov.genomic_accession || 'NC_000000.0',
-                assembly: ov.assembly || 'GRCh38.p14',
-                chromosome: String(ov.chromosome || '1'),
-                strand: ov.strand || '+',
-                gene_start: ov.gene_start || 1000000,
-                gene_stop: ov.gene_stop || 1050000,
-                retrieved_start: ov.retrieved_start || ov.gene_start || 1000000,
-                retrieved_stop: ov.retrieved_stop || ov.gene_stop || 1050000,
-                sequence_length: ov.sequence_length || 50000,
-                total_candidates: ov.total_candidates || 2500,
-                plus_strand: ov.plus_strand || 1250,
-                minus_strand: ov.minus_strand || 1250,
-                mean_gc: ov.mean_gc || 50.0,
-                mean_tm: ov.mean_tm || 52.0,
-                mean_delta_g: ov.mean_delta_g || -24.0,
-                mean_mfe: ov.mean_mfe || -1.6,
-                deep_mean: ov.deep_mean || 40.0,
-                deep_min: ov.deep_min || -5.0,
-                deep_max: ov.deep_max || 85.0,
-                deep_median: ov.deep_median || 41.0,
-                complete_searches: ov.complete_searches || 2000,
-                censored_searches: ov.censored_searches || 500,
-                max_cfd_risk: ov.max_cfd_risk || 3.5,
-                feasible: ov.feasible || 1800,
-                excluded: ov.excluded || 700,
-                pareto: ov.pareto || (data.pareto_front ? data.pareto_front.length : 8),
-                selected: ov.selected || (data.selected_guides ? data.selected_guides.length : 5)
+                name: ov.name || ov.description || `${gene}`,
+                accession: ov.accession || ov.genomic_accession || null,
+                assembly: ov.assembly || (ov.organism === 'Homo sapiens' ? 'GRCh38.p14' : null),
+                chromosome: ov.chromosome ? String(ov.chromosome) : null,
+                strand: ov.strand || null,
+                gene_start: ov.gene_start ?? null,
+                gene_stop: ov.gene_stop ?? null,
+                retrieved_start: ov.retrieved_start ?? ov.gene_start ?? null,
+                retrieved_stop: ov.retrieved_stop ?? ov.gene_stop ?? null,
+                sequence_length: ov.sequence_length ?? null,
+                total_candidates: ov.total_candidates ?? null,
+                plus_strand: ov.plus_strand ?? null,
+                minus_strand: ov.minus_strand ?? null,
+                mean_gc: ov.mean_gc ?? null,
+                mean_tm: ov.mean_tm ?? null,
+                mean_delta_g: ov.mean_delta_g ?? null,
+                mean_mfe: ov.mean_mfe ?? null,
+                deep_mean: ov.deep_mean ?? null,
+                deep_min: ov.deep_min ?? null,
+                deep_max: ov.deep_max ?? null,
+                deep_median: ov.deep_median ?? null,
+                complete_searches: ov.complete_searches ?? null,
+                censored_searches: ov.censored_searches ?? null,
+                max_cfd_risk: ov.max_cfd_risk ?? null,
+                feasible: ov.feasible ?? (data.feasible_sample ? data.feasible_sample.length : null),
+                excluded: ov.excluded ?? null,
+                pareto: ov.pareto ?? (data.pareto_front ? data.pareto_front.length : null),
+                selected: ov.selected ?? (data.selected_guides ? data.selected_guides.length : null)
             };
 
             if (!dashboardData) {
@@ -5739,6 +5658,7 @@
             const statusText = document.getElementById('ncbi-status-text');
             const resultCard = document.getElementById('ncbi-result-card');
             const errorCard = document.getElementById('ncbi-error-card');
+            const errorMsg = document.getElementById('ncbi-error-msg');
 
             if (!inp || !btn) return;
 
@@ -5746,6 +5666,13 @@
             if (!gene) {
                 showToast('Please enter a gene symbol first.');
                 inp.focus();
+                return;
+            }
+
+            // If it is one of the validated genes, immediately switch to it
+            if (['TP53', 'HBB', 'EGFR', 'BRCA1'].includes(gene)) {
+                handleGeneChange(gene);
+                showToast(`✓ Switched to validated research dataset for ${gene}`);
                 return;
             }
 
@@ -5757,7 +5684,7 @@
             _ncbiPending = true;
             btn.disabled = true;
             spinner.style.display = 'block';
-            statusText.textContent = `Querying NCBI Entrez & computing optimization workflow for ${gene}…`;
+            statusText.textContent = `Checking optimization pipeline support for ${gene}…`;
 
             try {
                 let data = null;
@@ -5767,33 +5694,37 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ gene }),
                     });
-
-                    if (res.ok) {
+                    try {
                         data = await res.json();
-                    }
+                    } catch (_) {}
                 }
 
-                if (!data || data.status === 'error') {
-                    // Generate fallback if server is offline or failed
-                    data = generateClientFallbackGeneData(gene);
+                if (!data || data.status === 'unsupported' || data.status === 'error' || !data.dynamic_scoring_supported) {
+                    const msg = (data && data.message)
+                        ? data.message
+                        : `Dynamic scoring is not supported for novel gene '${gene}'. Validated DeepSpCas9 activity and CFD off-target predictions are currently available for precomputed research genes (TP53, HBB, EGFR, BRCA1).`;
+                    if (errorMsg) errorMsg.textContent = msg;
+                    errorCard.style.display = 'block';
+                    showToast(`Notice: Dynamic scoring for ${gene} is not supported.`);
+                    return;
                 }
 
                 _lastResolvedData = data;
                 registerCustomGeneData(data);
                 renderNcbiResult(data);
-                showToast(`✓ ${gene} retrieved — ${(data.total_candidates || 0).toLocaleString()} PAM candidates processed`);
+                showToast(`✓ ${gene} retrieved`);
 
             } catch (err) {
-                console.warn('Network lookup error, using in silico model:', err);
-                const fallbackData = generateClientFallbackGeneData(gene);
-                _lastResolvedData = fallbackData;
-                registerCustomGeneData(fallbackData);
-                renderNcbiResult(fallbackData);
-                showToast(`✓ Generated in silico model for ${gene}`);
+                console.warn('Gene lookup notification:', err);
+                const msg = `Dynamic scoring is not supported for novel gene '${gene}'. Validated DeepSpCas9 activity and CFD off-target predictions are currently available for precomputed research genes (TP53, HBB, EGFR, BRCA1).`;
+                if (errorMsg) errorMsg.textContent = msg;
+                errorCard.style.display = 'block';
+                showToast(`Notice: Dynamic scoring for ${gene} is not supported.`);
             } finally {
                 _ncbiPending = false;
                 btn.disabled = false;
                 spinner.style.display = 'none';
+                statusText.textContent = '';
             }
         }
 
@@ -5842,6 +5773,10 @@
         function loadResolvedGeneIntoWorkflow() {
             if (!_lastResolvedData) return;
             const gene = _lastResolvedData.gene_symbol.toUpperCase();
+            if (!['TP53', 'HBB', 'EGFR', 'BRCA1'].includes(gene) && !_lastResolvedData.dynamic_scoring_supported) {
+                showToast(`Dynamic scoring is not supported for ${gene}. Please select a validated gene (TP53, HBB, EGFR, BRCA1).`);
+                return;
+            }
             registerCustomGeneData(_lastResolvedData);
             handleGeneChange(gene);
             enterResearchLab();

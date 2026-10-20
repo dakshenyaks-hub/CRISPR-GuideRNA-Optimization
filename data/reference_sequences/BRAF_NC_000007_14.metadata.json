@@ -1,0 +1,19 @@
+{
+  "gene_symbol": "BRAF",
+  "organism": "Homo sapiens",
+  "ncbi_gene_id": "673",
+  "chromosome": "7",
+  "genomic_accession": "NC_000007.14",
+  "assembly": "GRCh38",
+  "sequence_type": "genomic_DNA",
+  "strand": "minus",
+  "gene_start": 140713328,
+  "gene_stop": 140924929,
+  "retrieved_start": 140711328,
+  "retrieved_stop": 140926929,
+  "sequence_length": 215602,
+  "retrieval_timestamp": "2026-10-18T17:17:31.668153+00:00",
+  "fasta_path": "C:\\Users\\daksh\\Documents\\CRISPR-GuideRNA-Optimization\\data\\reference_sequences\\BRAF_NC_000007_14.fasta",
+  "selection_rule": "Retrieved genomic DNA from GRCh38 reference chromosome. Region includes gene body plus 2000 bp flanking on each side. Sequence is on the gene's native strand orientation.",
+  "notes": ""
+}

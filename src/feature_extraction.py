@@ -61,6 +61,7 @@ class FeatureConfig:
     bowtie_index: Optional[str] = None      # prebuilt Bowtie index prefix (skips build step)
     max_mismatches: int = 3                 # Bowtie -v mismatch tolerance
     threads: int = 4
+    defer_bowtie_to_cfd: bool = False       # whether alignment is deferred to CFD stage
 
 
 # --------------------------------------------------------------------------- #
@@ -364,10 +365,16 @@ def extract_specificity_features(guides: list[str], config: FeatureConfig) -> di
         build_bowtie_index(config.genome_fasta, index_prefix)
 
     if index_prefix is None:
-        log.warning(
-            "No reference genome or Bowtie index provided - "
-            "specificity features will be reported as NaN."
-        )
+        if getattr(config, "defer_bowtie_to_cfd", False):
+            log.info(
+                "Bowtie alignment intentionally deferred to CFD stage "
+                "for single-pass CFD scoring and genomic PAM extraction."
+            )
+        else:
+            log.warning(
+                "No reference genome or Bowtie index provided - "
+                "specificity features will be reported as NaN."
+            )
         return {
             g: {
                 "off_target_count": float("nan"),

@@ -153,26 +153,25 @@ def parse_bowtie_and_extract_cfd_features(
             read_seq = fields[4].upper()
             edit_str = fields[7].strip() if len(fields) > 7 else ""
 
-            # Extract genomic protospacer and PAM using genome index
+            # Extract genomic protospacer and PAM using genome index (unified 23-mer slice with exception safety)
+            protospacer_seq = read_seq
+            pam_3nt = ""
             if chrom in genome:
                 chr_len = len(genome[chrom])
-                if strand == "+":
-                    if offset >= 0 and offset + 23 <= chr_len:
-                        protospacer_seq = genome[chrom][offset : offset + 20].seq.upper()
-                        pam_3nt = genome[chrom][offset + 20 : offset + 23].seq.upper()
-                    else:
-                        protospacer_seq = read_seq
-                        pam_3nt = ""
-                else:  # strand == "-"
-                    if offset >= 3 and offset + 20 <= chr_len:
-                        protospacer_seq = revcomp(genome[chrom][offset : offset + 20].seq.upper())
-                        pam_3nt = revcomp(genome[chrom][offset - 3 : offset].seq.upper())
-                    else:
-                        protospacer_seq = revcomp(read_seq)
-                        pam_3nt = ""
-            else:
-                protospacer_seq = read_seq
-                pam_3nt = ""
+                try:
+                    if strand == "+":
+                        if offset >= 0 and offset + 23 <= chr_len:
+                            full_seq = genome[chrom][offset : offset + 23].seq.upper()
+                            protospacer_seq = full_seq[:20]
+                            pam_3nt = full_seq[20:23]
+                    else:  # strand == "-"
+                        if offset >= 3 and offset + 20 <= chr_len:
+                            full_seq = revcomp(genome[chrom][offset - 3 : offset + 20].seq.upper())
+                            protospacer_seq = full_seq[:20]
+                            pam_3nt = full_seq[20:23]
+                except (OSError, IndexError, ValueError, KeyError) as exc:
+                    protospacer_seq = read_seq
+                    pam_3nt = ""
 
             n_mm = len(edit_str.split(",")) if edit_str else 0
 

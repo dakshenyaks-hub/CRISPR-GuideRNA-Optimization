@@ -42,6 +42,19 @@ class DeepSpCas9Model(nn.Module):
     """
     PyTorch implementation of the published DeepSpCas9 architecture (Kim et al., 2019).
     Faithfully reproduces layer dimensions, activations, pooling, and concatenation logic.
+
+    Output Semantics & Unconstrained Linear Regression Head:
+      The architecture terminates in a single linear regression head (`nn.Linear(60, 1)`)
+      with no activation function, bounding, or clamping (no sigmoid or ReLU). The model
+      was trained using MSE loss on experimentally measured indel frequencies (percentage
+      scale, roughly 0% to 100%).
+
+      For sequences with unfavorable nucleotide context or negligible cleavage activity,
+      the unconstrained linear combination can evaluate to small negative values (e.g.
+      -15.0 to 0.0). These negative values are authentic model predictions representing
+      sub-detection / inactive targets, not an implementation or transformation error.
+      Predictions are intentionally unclipped to maintain ranking fidelity and exact
+      numerical parity with the published TensorFlow checkpoint.
     """
 
     def __init__(self) -> None:
@@ -236,6 +249,10 @@ class DeepSpCas9Predictor:
 
         Returns:
             1D numpy array of float32 predictions (same length as sequences).
+            Raw scores represent unconstrained linear predictions of indel percentage
+            (Kim et al., 2019) and may produce negative values (e.g. down to -15) for
+            guides with negligible/undetectable cleavage propensity. Raw scores are
+            intentionally preserved without clipping.
         """
         if not sequences:
             return np.empty(0, dtype=np.float32)

@@ -22,6 +22,7 @@ import argparse
 import http.server
 import json
 import logging
+import os
 import re
 import socket
 import socketserver
@@ -34,8 +35,6 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-import numpy as np
-import pandas as pd
 from src.pipeline_controller import PipelineController, SUPPORTED_GENES
 
 DASHBOARD_DIR = PROJECT_ROOT / "dashboard"
@@ -49,212 +48,27 @@ logging.basicConfig(
 log = logging.getLogger("serve_dashboard")
 
 
-# In-memory dynamic gene store for custom NCBI retrievals
-DYNAMIC_GENES: dict[str, dict] = {}
-
-
 def _is_valid_gene_symbol(symbol: str) -> bool:
     """Validate gene symbol: 1–30 chars, alphanumeric + hyphen + dot."""
-    return bool(re.match(r"^[A-Za-z0-9][A-Za-z0-9.\-]{0,29}$", symbol.strip()))
-
-
-def _compute_dynamic_gene_pipeline(gene_symbol: str, meta_dict: dict, fasta_path: str) -> dict:
-    """
-    Computes gRNA candidates, thermodynamic/sequence features, on-target/CFD
-    scores, feasibility filters, Pareto frontier, and Top-5 balanced selections
-    for dynamically retrieved NCBI genes.
-    """
-    import numpy as np
-    from src.guide_generation import build_guide_dataframe, read_fasta_sequence
-
-    sequence = read_fasta_sequence(fasta_path)
-    df = build_guide_dataframe(sequence)
-    total_candidates = len(df)
-
-    if total_candidates == 0:
-        raise ValueError(f"No PAM (NGG) sites found in sequence for {gene_symbol}.")
-
-    n_plus = int((df["strand"] == "+").sum())
-    n_minus = int((df["strand"] == "-").sum())
-
-    # Build candidates with features
-    records = []
-    for idx, row in df.iterrows():
-        seq = str(row["guide_rna"]).upper()
-        gc_count = seq.count("G") + seq.count("C")
-        gc_frac = round(gc_count / 20.0, 4)
-        
-        # Homopolymer run
-        max_homo = 1
-        curr_homo = 1
-        for j in range(1, len(seq)):
-            if seq[j] == seq[j - 1]:
-                curr_homo += 1
-                if curr_homo > max_homo:
-                    max_homo = curr_homo
-            else:
-                curr_homo = 1
-        
-        has_poly_t = "TTTT" in seq
-        
-        # SantaLucia approximate melting temp
-        tm = round(64.9 + 41.0 * (gc_count - 16.4) / 20.0, 2)
-        dg = round(-18.0 - (gc_count * 0.35), 2)
-        mfe = round(-1.2 - (0.4 if "GC" in seq else 0.1), 2)
-        
-        # DeepSpCas9 activity proxy (40-85% nominal with sequence-dependent variation)
-        seed_gc = (seq[10:].count("G") + seq[10:].count("C")) / 10.0
-        g20_bonus = 5.0 if seq.endswith("G") else 0.0
-        gc_opt_pen = -abs(gc_frac - 0.50) * 20.0
-        # Deterministic hash pseudo-random component based on sequence
-        h_val = (hash(seq) % 1000) / 1000.0
-        activity = float(np.clip(42.0 + seed_gc * 18.0 + g20_bonus + gc_opt_pen + (h_val * 24.0 - 12.0), 10.0, 88.5))
-        
-        # CFD off-target risk proxy & specificity
-        risk = float(np.clip(0.3 + (1.0 - seed_gc) * 2.5 + (h_val * 3.0), 0.15, 6.5))
-        cfd_spec = round(100.0 / (100.0 + risk), 4)
-        
-        # Feasibility check
-        is_feasible = (0.30 <= gc_frac <= 0.70) and (not has_poly_t) and (max_homo <= 4)
-        
-        guide_id = f"{gene_symbol}_{row['pam_position']}_{row['strand']}"
-        
-        records.append({
-            "guide_id": guide_id,
-            "guide_rna": seq,
-            "pam_sequence": str(row["pam_sequence"]),
-            "pam_position": int(row["pam_position"]),
-            "strand": str(row["strand"]),
-            "gc_content": gc_frac,
-            "melting_temp_c": tm,
-            "delta_g_kcal_mol": dg,
-            "folding_energy_kcal_mol": mfe,
-            "has_poly_t": has_poly_t,
-            "max_homopolymer": max_homo,
-            "deep_spcas9_score": round(activity, 2),
-            "cfd_off_target_risk": round(risk, 2),
-            "cfd_specificity_score": cfd_spec,
-            "is_feasible": is_feasible,
-            "secondary_structure": "...................." if max_homo <= 2 else "..((((....))))......",
-            "off_targets_0mm": 0,
-            "off_targets_1mm": 0 if risk < 2.0 else 1,
-            "off_targets_2mm": int(risk * 1.5),
-            "off_targets_3mm": int(risk * 35 + 20),
-        })
-
-    all_df = pd.DataFrame(records)
-    feasible_df = all_df[all_df["is_feasible"]].copy()
-
-    if len(feasible_df) == 0:
-        feasible_df = all_df.head(min(10, len(all_df))).copy()
-
-    # Normalization over feasible set
-    act_min = float(feasible_df["deep_spcas9_score"].min())
-    act_max = float(feasible_df["deep_spcas9_score"].max())
-    act_denom = act_max - act_min if act_max > act_min else 1.0
-
-    spec_min = float(feasible_df["cfd_specificity_score"].min())
-    spec_max = float(feasible_df["cfd_specificity_score"].max())
-    spec_denom = spec_max - spec_min if spec_max > spec_min else 1.0
-
-    all_df["norm_activity"] = ((all_df["deep_spcas9_score"] - act_min) / act_denom).clip(0.0, 1.0).round(4)
-    all_df["norm_cfd_specificity"] = ((all_df["cfd_specificity_score"] - spec_min) / spec_denom).clip(0.0, 1.0).round(4)
-    all_df["balanced_score"] = (0.5 * all_df["norm_activity"] + 0.5 * all_df["norm_cfd_specificity"]).round(4)
-
-    feasible_df = all_df[all_df["is_feasible"]].copy()
-
-    # Find Pareto optimal points in feasible set
-    feasible_records = feasible_df.to_dict(orient="records")
-    pareto_points = []
-    for c in feasible_records:
-        act = c["deep_spcas9_score"]
-        spec = c["cfd_specificity_score"]
-        # Dominated if another candidate is >= in both and > in at least one
-        is_dominated = False
-        for other in feasible_records:
-            if (other["deep_spcas9_score"] >= act and other["cfd_specificity_score"] >= spec) and \
-               (other["deep_spcas9_score"] > act or other["cfd_specificity_score"] > spec):
-                is_dominated = True
-                break
-        if not is_dominated:
-            pareto_points.append(c)
-
-    if not pareto_points:
-        pareto_points = sorted(feasible_records, key=lambda x: x["balanced_score"], reverse=True)[:8]
-
-    # Select Top 5 under balanced scalarization
-    sorted_by_utility = sorted(feasible_records, key=lambda x: (x["balanced_score"], x["deep_spcas9_score"]), reverse=True)
-    selected_top5 = sorted_by_utility[:5]
-
-    # Sample up to 200 candidates across the gene window for responsive frontend charts
-    step = max(1, len(feasible_records) // 150)
-    feasible_sample = feasible_records[::step][:200]
-    # Ensure selected top5 and pareto are in feasible_sample
-    existing_ids = {g["guide_id"] for g in feasible_sample}
-    for g in pareto_points + selected_top5:
-        if g["guide_id"] not in existing_ids:
-            feasible_sample.append(g)
-            existing_ids.add(g["guide_id"])
-
-    overview = {
-        "gene_symbol": gene_symbol,
-        "name": meta_dict.get("description") or f"{gene_symbol} (Homo sapiens)",
-        "ncbi_gene_id": meta_dict.get("ncbi_gene_id"),
-        "organism": meta_dict.get("organism", "Homo sapiens"),
-        "assembly": meta_dict.get("assembly", "GRCh38.p14"),
-        "chromosome": str(meta_dict.get("chromosome", "")),
-        "accession": meta_dict.get("genomic_accession", meta_dict.get("accession", "N/A")),
-        "strand": meta_dict.get("strand", "+"),
-        "gene_start": meta_dict.get("gene_start", 0),
-        "gene_stop": meta_dict.get("gene_stop", 0),
-        "retrieved_start": meta_dict.get("retrieved_start", meta_dict.get("gene_start", 0)),
-        "retrieved_stop": meta_dict.get("retrieved_stop", meta_dict.get("gene_stop", 0)),
-        "sequence_length": meta_dict.get("sequence_length", len(sequence)),
-        "total_candidates": total_candidates,
-        "plus_strand": n_plus,
-        "minus_strand": n_minus,
-        "mean_gc": round(float(all_df["gc_content"].mean() * 100), 2),
-        "mean_tm": round(float(all_df["melting_temp_c"].mean()), 2),
-        "mean_delta_g": round(float(all_df["delta_g_kcal_mol"].mean()), 2),
-        "mean_mfe": round(float(all_df["folding_energy_kcal_mol"].mean()), 2),
-        "deep_mean": round(float(all_df["deep_spcas9_score"].mean()), 2),
-        "deep_min": round(float(all_df["deep_spcas9_score"].min()), 2),
-        "deep_max": round(float(all_df["deep_spcas9_score"].max()), 2),
-        "deep_median": round(float(all_df["deep_spcas9_score"].median()), 2),
-        "complete_searches": int(len(feasible_df) + int(len(all_df) * 0.15)),
-        "censored_searches": int(len(all_df) - (len(feasible_df) + int(len(all_df) * 0.15))),
-        "max_cfd_risk": round(float(all_df["cfd_off_target_risk"].max()), 2),
-        "feasible": int(len(feasible_df)),
-        "excluded": int(len(all_df) - len(feasible_df)),
-        "pareto": int(len(pareto_points)),
-        "selected": int(len(selected_top5)),
-    }
-
-    return {
-        "status": "success",
-        "gene_symbol": gene_symbol,
-        "overview": overview,
-        "meta": overview,
-        "feasible_sample": feasible_sample,
-        "pareto_front": pareto_points,
-        "selected_guides": selected_top5,
-        "total_candidates": total_candidates,
-        "plus_strand": n_plus,
-        "minus_strand": n_minus,
-        "note": (
-            f"Successfully retrieved genomic DNA for {gene_symbol} from GRCh38 via NCBI Entrez. "
-            f"Extracted {total_candidates:,} candidate guides, filtered {len(feasible_df):,} feasible candidates, "
-            f"and optimized Top-5 balanced designs."
-        ),
-    }
+    if not isinstance(symbol, str):
+        return False
+    trimmed = symbol.strip()
+    if not trimmed or len(trimmed) > 30:
+        return False
+    return bool(re.match(r"^[A-Za-z0-9][A-Za-z0-9.\-]{0,29}$", trimmed))
 
 
 def _resolve_gene_ncbi(gene_symbol: str) -> dict:
     """
-    Resolve a gene symbol via NCBI, run PAM scanning, compute features & optimization,
-    and cache the complete dataset for dynamic interactive workflow stages.
+    Resolve a gene symbol via NCBI sequence provider and perform PAM scanning.
+
+    IMPORTANT: Dynamic DeepSpCas9 activity scoring and CFD off-target calculations
+    are explicitly NOT executed for novel genes. Proxy or heuristic scores are never
+    substituted. Truly validated DeepSpCas9 and CFD predictions are precomputed
+    and maintained exclusively for SUPPORTED_GENES.
     """
     from src.ncbi_sequence_provider import NCBISequenceProvider
+    from src.guide_generation import build_guide_dataframe, read_fasta_sequence
 
     provider = NCBISequenceProvider(
         cache_dir=str(PROJECT_ROOT / "data" / "reference_sequences"),
@@ -279,14 +93,41 @@ def _resolve_gene_ncbi(gene_symbol: str) -> dict:
         "description": f"{meta.gene_symbol} (Homo sapiens)",
     }
 
-    full_payload = _compute_dynamic_gene_pipeline(gene_symbol, meta_dict, str(result.fasta_path))
-    
-    # Store in memory for GET /api/gene/<GENE> and /api/genes
-    DYNAMIC_GENES[gene_symbol] = full_payload
+    sequence = read_fasta_sequence(str(result.fasta_path))
+    df = build_guide_dataframe(sequence)
+    total_candidates = len(df)
+    n_plus = int((df["strand"] == "+").sum()) if total_candidates > 0 else 0
+    n_minus = int((df["strand"] == "-").sum()) if total_candidates > 0 else 0
 
-    # Merge flat fields for backwards compatibility with UI
-    out = {**meta_dict, **full_payload["overview"], **full_payload}
-    return out
+    overview = {
+        **meta_dict,
+        "total_candidates": total_candidates,
+        "plus_strand": n_plus,
+        "minus_strand": n_minus,
+    }
+
+    return {
+        "status": "success",
+        **meta_dict,
+        "overview": overview,
+        "meta": meta_dict,
+        "total_candidates": total_candidates,
+        "plus_strand": n_plus,
+        "minus_strand": n_minus,
+        "deep_spcas9_score": None,
+        "cfd_off_target_risk": None,
+        "cfd_specificity_score": None,
+        "feasible_sample": [],
+        "pareto_front": [],
+        "selected_guides": [],
+        "dynamic_scoring_supported": False,
+        "scoring_status": "unsupported",
+        "message": (
+            f"Successfully resolved genomic DNA and {total_candidates:,} PAM candidate guides "
+            f"for {gene_symbol}. Dynamic DeepSpCas9 and CFD off-target scoring are currently unsupported. "
+            f"Validated scoring is available exclusively for: {', '.join(SUPPORTED_GENES)}."
+        ),
+    }
 
 
 class DashboardRequestHandler(http.server.SimpleHTTPRequestHandler):
@@ -313,25 +154,92 @@ class DashboardRequestHandler(http.server.SimpleHTTPRequestHandler):
         if path == "/api/resolve_gene":
             try:
                 length = int(self.headers.get("Content-Length", 0))
-                body = self.rfile.read(length) if length else b"{}"
-                payload = json.loads(body.decode("utf-8"))
-                gene_symbol = payload.get("gene", "").strip().upper()
-
-                if not gene_symbol:
-                    self.send_json({"status": "error", "message": "Missing 'gene' field in request body."}, status=400)
+                if length > 65536:
+                    self.send_json({"status": "error", "message": "Payload too large (maximum 64 KB)."}, status=413)
                     return
 
+                body = self.rfile.read(length) if length else b"{}"
+                try:
+                    payload = json.loads(body.decode("utf-8"))
+                except (json.JSONDecodeError, UnicodeDecodeError):
+                    self.send_json({"status": "error", "message": "Invalid JSON format in request body."}, status=400)
+                    return
+
+                if not isinstance(payload, dict):
+                    self.send_json({"status": "error", "message": "Request body must be a JSON object."}, status=400)
+                    return
+
+                raw_gene = payload.get("gene")
+                if not raw_gene or not isinstance(raw_gene, str):
+                    self.send_json({"status": "error", "message": "Missing or invalid 'gene' field in request body."}, status=400)
+                    return
+
+                gene_symbol = raw_gene.strip().upper()
                 if not _is_valid_gene_symbol(gene_symbol):
                     self.send_json({"status": "error", "message": f"Invalid gene symbol: '{gene_symbol}'."}, status=400)
                     return
 
-                log.info("NCBI gene resolution requested: %s", gene_symbol)
-                result = _resolve_gene_ncbi(gene_symbol)
-                self.send_json(result)
+                # If requested gene is one of our four precomputed research genes, return its verified baseline
+                if gene_symbol in SUPPORTED_GENES:
+                    log.info("Serving verified research data for precomputed gene: %s", gene_symbol)
+                    overview = PipelineController.get_gene_overview(gene_symbol)
+                    pareto = PipelineController.get_pareto_front(gene_symbol)
+                    selected = PipelineController.get_selected_guides(gene_symbol)
+                    feasible = PipelineController.get_feasible_candidates(gene_symbol, 2000)
+                    meta = PipelineController.get_gene_metadata(gene_symbol)
+                    self.send_json({
+                        "status": "success",
+                        "gene_symbol": gene_symbol,
+                        "overview": overview,
+                        "meta": meta,
+                        "pareto_front": pareto,
+                        "selected_guides": selected,
+                        "feasible_sample": feasible,
+                        "dynamic_scoring_supported": True,
+                        "validated": True,
+                        "note": f"Validated research dataset loaded for {gene_symbol}."
+                    }, status=200)
+                    return
+
+                # Dynamic analysis for novel genes using genuine pipeline modules
+                log.info("Dynamic gene analysis requested for: %s", gene_symbol)
+
+                # Extract optional parameters
+                fasta_sequence = payload.get("fasta_sequence")
+                accession = payload.get("accession")
+                skip_bowtie = payload.get("skip_bowtie", False)
+                skip_deepcas9 = payload.get("skip_deepcas9", False)
+                skip_optimization = payload.get("skip_optimization", False)
+
+                try:
+                    from src.dynamic_pipeline import run_dynamic_pipeline
+                    pipeline_result = run_dynamic_pipeline(
+                        gene_symbol=gene_symbol,
+                        accession=accession,
+                        fasta_sequence=fasta_sequence,
+                        skip_bowtie=skip_bowtie,
+                        skip_deepcas9=skip_deepcas9,
+                        skip_optimization=skip_optimization,
+                    )
+                    response = pipeline_result.to_api_response()
+                    self.send_json(response, status=200)
+                except Exception as exc:
+                    log.error("Dynamic pipeline failed for %s: %s", gene_symbol, exc, exc_info=True)
+                    self.send_json({
+                        "status": "error",
+                        "gene_symbol": gene_symbol,
+                        "dynamic_scoring_supported": False,
+                        "message": (
+                            f"Dynamic analysis failed for gene '{gene_symbol}': {exc}. "
+                            f"Validated data is available for: {', '.join(SUPPORTED_GENES)}."
+                        ),
+                        "supported_genes": list(SUPPORTED_GENES),
+                    }, status=500)
+                return
 
             except Exception as exc:
-                log.error("NCBI resolution failed: %s", exc)
-                self.send_json({"status": "error", "message": str(exc)}, status=500)
+                log.error("Internal error in POST /api/resolve_gene: %s", exc, exc_info=True)
+                self.send_json({"status": "error", "message": "An internal error occurred while processing the request."}, status=500)
             return
 
         self.send_error(404, f"POST endpoint not found: {path}")
@@ -341,32 +249,44 @@ class DashboardRequestHandler(http.server.SimpleHTTPRequestHandler):
         path = parsed.path
 
         if path == "/api/status":
-            self.send_json({"status": "online", "platform": "CRISPR-Optimization-Dashboard"})
+            from src.dynamic_pipeline import _check_deepcas9_available, _check_bowtie_available, _check_bowtie_executable
+            self.send_json({
+                "status": "online",
+                "platform": "CRISPR-Optimization-Dashboard",
+                "supported_genes": list(SUPPORTED_GENES),
+                "dynamic_analysis_supported": True,
+                "resources": {
+                    "deepspcas9_model": _check_deepcas9_available(),
+                    "hg38_bowtie_index": _check_bowtie_available(),
+                    "bowtie_executable": _check_bowtie_executable(),
+                },
+            })
             return
 
         if path == "/api/genes":
-            all_genes = list(SUPPORTED_GENES) + [g for g in DYNAMIC_GENES.keys() if g not in SUPPORTED_GENES]
-            self.send_json({"genes": all_genes})
+            self.send_json({
+                "genes": list(SUPPORTED_GENES),
+                "dynamic_genes": PipelineController.list_dynamic_genes(),
+            })
+            return
+
+        if path == "/api/dynamic_genes":
+            self.send_json({
+                "dynamic_genes": PipelineController.list_dynamic_genes(),
+            })
             return
 
         if path == "/api/data":
             payload = PipelineController.get_full_dashboard_payload()
-            if DYNAMIC_GENES:
-                for dg, ddata in DYNAMIC_GENES.items():
-                    payload["genes"][dg] = ddata
-                    if dg not in payload["supported_genes"]:
-                        payload["supported_genes"].append(dg)
             self.send_json(payload)
             return
 
         if path.startswith("/api/gene/"):
             gene = path.split("/")[-1].upper()
-            if gene in DYNAMIC_GENES:
-                self.send_json(DYNAMIC_GENES[gene])
-                return
-            elif gene in SUPPORTED_GENES:
+            if gene in SUPPORTED_GENES:
                 data = {
                     "gene": gene,
+                    "validated": True,
                     "overview": PipelineController.get_gene_overview(gene),
                     "pareto_front": PipelineController.get_pareto_front(gene),
                     "selected_guides": PipelineController.get_selected_guides(gene),
@@ -376,7 +296,36 @@ class DashboardRequestHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_json(data)
                 return
             else:
-                self.send_error(404, f"Gene '{gene}' not supported. Valid: {SUPPORTED_GENES + list(DYNAMIC_GENES.keys())}")
+                # Check if it was analyzed dynamically
+                dyn_summary = PipelineController.get_dynamic_gene_summary(gene)
+                if dyn_summary is not None:
+                    # Load dynamic results
+                    dyn_dir = PROJECT_ROOT / "results" / "dynamic" / gene
+                    opt_dir = dyn_dir / "optimization"
+                    pareto = []
+                    selected = []
+                    feasible = []
+                    if (opt_dir / "pareto_front.csv").exists():
+                        pareto = pd.read_csv(opt_dir / "pareto_front.csv").to_dict(orient="records")
+                    if (opt_dir / "selected_guides.csv").exists():
+                        selected = pd.read_csv(opt_dir / "selected_guides.csv").to_dict(orient="records")
+                    if (opt_dir / "feasible_candidates.csv").exists():
+                        feasible = pd.read_csv(opt_dir / "feasible_candidates.csv").head(2000).to_dict(orient="records")
+                    self.send_json({
+                        "gene": gene,
+                        "validated": False,
+                        "dynamic": True,
+                        "summary": dyn_summary,
+                        "pareto_front": pareto,
+                        "selected_guides": selected,
+                        "feasible_sample": feasible,
+                    })
+                    return
+                self.send_json({
+                    "status": "unsupported",
+                    "gene": gene,
+                    "message": f"Gene '{gene}' is not supported or loaded. Validated data is available for: {', '.join(SUPPORTED_GENES)}. Use POST /api/resolve_gene to run dynamic analysis."
+                }, status=404)
                 return
 
         # /api/ncbi_gene_info/<GENE> — quick metadata-only check (no NCBI call if not cached)
@@ -413,12 +362,12 @@ class DashboardRequestHandler(http.server.SimpleHTTPRequestHandler):
             pass
 
 
-def find_free_port(start_port: int = 8000, max_attempts: int = 20) -> int:
+def find_free_port(start_port: int = 8000, max_attempts: int = 20, host: str = "0.0.0.0") -> int:
     """Finds an available local TCP port."""
     for p in range(start_port, start_port + max_attempts):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             try:
-                s.bind(("", p))
+                s.bind((host, p))
                 return p
             except OSError:
                 continue
@@ -437,10 +386,24 @@ def ensure_data_json():
 
 def main():
     parser = argparse.ArgumentParser(description="Serve CRISPR Guide RNA Optimization Dashboard")
-    parser.add_argument("--port", type=int, default=8000, help="Port to serve dashboard on (default: 8000)")
+    parser.add_argument("--host", type=str, default="0.0.0.0", help="Host address to bind to (default: 0.0.0.0)")
+    parser.add_argument("--port", type=int, default=None, help="Port to serve dashboard on (default: $PORT or 8000)")
     parser.add_argument("--no-browser", action="store_true", help="Do not automatically open browser")
     parser.add_argument("--regenerate-data", action="store_true", help="Force regenerate dashboard/data.json")
     args = parser.parse_args()
+
+    # Priority: CLI --port > environment variable PORT > fallback free port
+    env_port_str = os.environ.get("PORT")
+    env_port = int(env_port_str) if env_port_str and env_port_str.isdigit() else None
+
+    if args.port is not None:
+        port = args.port
+    elif env_port is not None:
+        port = env_port
+    else:
+        port = find_free_port(8000, host=args.host)
+
+    is_cloud_env = bool(env_port_str)
 
     if args.regenerate_data or not DATA_JSON_PATH.exists():
         log.info("Regenerating dashboard/data.json from pipeline controller...")
@@ -449,28 +412,30 @@ def main():
             json.dump(payload, fp, indent=2)
         log.info("Data regenerated successfully.")
 
-    port = find_free_port(args.port)
-    url = f"http://localhost:{port}"
+    host = args.host
+    url = f"http://{'localhost' if host in ('0.0.0.0', '') else host}:{port}"
 
     log.info("=" * 72)
     log.info("CRISPR MULTI-GENE OPTIMIZATION DASHBOARD SERVER")
     log.info("=" * 72)
+    log.info("  Host binding:      %s", host)
+    log.info("  Port:              %d", port)
     log.info("  Serving directory: %s", DASHBOARD_DIR)
     log.info("  Dashboard URL:     %s", url)
     log.info("  Supported genes:   %s", ", ".join(SUPPORTED_GENES))
     log.info("=" * 72)
 
-    if not args.no_browser:
+    if not args.no_browser and not is_cloud_env:
         try:
             webbrowser.open(url)
         except Exception:
             pass
 
-    server_address = ("", port)
+    server_address = (host, port)
     socketserver.TCPServer.allow_reuse_address = True
     with socketserver.TCPServer(server_address, DashboardRequestHandler) as httpd:
         try:
-            log.info("Server running. Press Ctrl+C to stop.")
+            log.info("Server running at http://%s:%d. Press Ctrl+C to stop.", host, port)
             httpd.serve_forever()
         except KeyboardInterrupt:
             log.info("\nServer stopped.")
@@ -478,3 +443,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
