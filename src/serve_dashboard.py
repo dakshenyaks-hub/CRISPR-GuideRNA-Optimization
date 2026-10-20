@@ -22,6 +22,7 @@ import argparse
 import http.server
 import json
 import logging
+import math
 import os
 import re
 import socket
@@ -29,7 +30,11 @@ import socketserver
 import sys
 import webbrowser
 from pathlib import Path
+from typing import Any
 from urllib.parse import urlparse
+
+import numpy as np
+import pandas as pd
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -49,13 +54,34 @@ log = logging.getLogger("serve_dashboard")
 
 
 def _is_valid_gene_symbol(symbol: str) -> bool:
-    """Validate gene symbol: 1–30 chars, alphanumeric + hyphen + dot."""
+    """Validate gene symbol: 1–30 chars, alphanumeric + hyphen + dot + underscore."""
     if not isinstance(symbol, str):
         return False
     trimmed = symbol.strip()
     if not trimmed or len(trimmed) > 30:
         return False
-    return bool(re.match(r"^[A-Za-z0-9][A-Za-z0-9.\-]{0,29}$", trimmed))
+    return bool(re.match(r"^[A-Za-z0-9][A-Za-z0-9._\-]{0,29}$", trimmed))
+
+
+def _sanitize_for_json(obj: Any) -> Any:
+    """Recursively replace NaN and infinite float values with None for standard JSON compliance."""
+    if isinstance(obj, float):
+        if math.isnan(obj) or math.isinf(obj):
+            return None
+        return obj
+    elif isinstance(obj, (np.floating, np.float32, np.float64)):
+        if np.isnan(obj) or np.isinf(obj):
+            return None
+        return float(obj)
+    elif isinstance(obj, (int, np.integer, np.int64, np.int32)):
+        return int(obj)
+    elif isinstance(obj, np.ndarray):
+        return _sanitize_for_json(obj.tolist())
+    elif isinstance(obj, dict):
+        return {k: _sanitize_for_json(v) for k, v in obj.items()}
+    elif isinstance(obj, (list, tuple)):
+        return [_sanitize_for_json(v) for v in obj]
+    return obj
 
 
 def _resolve_gene_ncbi(gene_symbol: str) -> dict:
@@ -209,20 +235,41 @@ class DashboardRequestHandler(http.server.SimpleHTTPRequestHandler):
                 accession = payload.get("accession")
                 skip_bowtie = payload.get("skip_bowtie", False)
                 skip_deepcas9 = payload.get("skip_deepcas9", False)
+                skip_cfd = payload.get("skip_cfd", False)
                 skip_optimization = payload.get("skip_optimization", False)
 
                 try:
                     from src.dynamic_pipeline import run_dynamic_pipeline
+                    from src.ncbi_sequence_provider import NCBIResolutionError, NCBINetworkError
                     pipeline_result = run_dynamic_pipeline(
                         gene_symbol=gene_symbol,
                         accession=accession,
                         fasta_sequence=fasta_sequence,
                         skip_bowtie=skip_bowtie,
                         skip_deepcas9=skip_deepcas9,
+                        skip_cfd=skip_cfd,
                         skip_optimization=skip_optimization,
                     )
                     response = pipeline_result.to_api_response()
                     self.send_json(response, status=200)
+                except NCBIResolutionError as exc:
+                    log.warning("Gene not found via NCBI: %s", exc)
+                    self.send_json({
+                        "status": "error",
+                        "gene_symbol": gene_symbol,
+                        "dynamic_scoring_supported": False,
+                        "message": str(exc),
+                        "supported_genes": list(SUPPORTED_GENES),
+                    }, status=404)
+                except NCBINetworkError as exc:
+                    log.warning("NCBI network error: %s", exc)
+                    self.send_json({
+                        "status": "error",
+                        "gene_symbol": gene_symbol,
+                        "dynamic_scoring_supported": False,
+                        "message": str(exc),
+                        "supported_genes": list(SUPPORTED_GENES),
+                    }, status=503)
                 except Exception as exc:
                     log.error("Dynamic pipeline failed for %s: %s", gene_symbol, exc, exc_info=True)
                     self.send_json({
@@ -245,114 +292,119 @@ class DashboardRequestHandler(http.server.SimpleHTTPRequestHandler):
         self.send_error(404, f"POST endpoint not found: {path}")
 
     def do_GET(self):
-        parsed = urlparse(self.path)
-        path = parsed.path
+        try:
+            parsed = urlparse(self.path)
+            path = parsed.path
 
-        if path == "/api/status":
-            from src.dynamic_pipeline import _check_deepcas9_available, _check_bowtie_available, _check_bowtie_executable
-            self.send_json({
-                "status": "online",
-                "platform": "CRISPR-Optimization-Dashboard",
-                "supported_genes": list(SUPPORTED_GENES),
-                "dynamic_analysis_supported": True,
-                "resources": {
-                    "deepspcas9_model": _check_deepcas9_available(),
-                    "hg38_bowtie_index": _check_bowtie_available(),
-                    "bowtie_executable": _check_bowtie_executable(),
-                },
-            })
-            return
-
-        if path == "/api/genes":
-            self.send_json({
-                "genes": list(SUPPORTED_GENES),
-                "dynamic_genes": PipelineController.list_dynamic_genes(),
-            })
-            return
-
-        if path == "/api/dynamic_genes":
-            self.send_json({
-                "dynamic_genes": PipelineController.list_dynamic_genes(),
-            })
-            return
-
-        if path == "/api/data":
-            payload = PipelineController.get_full_dashboard_payload()
-            self.send_json(payload)
-            return
-
-        if path.startswith("/api/gene/"):
-            gene = path.split("/")[-1].upper()
-            if gene in SUPPORTED_GENES:
-                data = {
-                    "gene": gene,
-                    "validated": True,
-                    "overview": PipelineController.get_gene_overview(gene),
-                    "pareto_front": PipelineController.get_pareto_front(gene),
-                    "selected_guides": PipelineController.get_selected_guides(gene),
-                    "feasible_sample": PipelineController.get_feasible_candidates(gene, 2000),
-                    "sensitivity": PipelineController.get_sensitivity_summary(gene),
-                }
-                self.send_json(data)
-                return
-            else:
-                # Check if it was analyzed dynamically
-                dyn_summary = PipelineController.get_dynamic_gene_summary(gene)
-                if dyn_summary is not None:
-                    # Load dynamic results
-                    dyn_dir = PROJECT_ROOT / "results" / "dynamic" / gene
-                    opt_dir = dyn_dir / "optimization"
-                    pareto = []
-                    selected = []
-                    feasible = []
-                    if (opt_dir / "pareto_front.csv").exists():
-                        pareto = pd.read_csv(opt_dir / "pareto_front.csv").to_dict(orient="records")
-                    if (opt_dir / "selected_guides.csv").exists():
-                        selected = pd.read_csv(opt_dir / "selected_guides.csv").to_dict(orient="records")
-                    if (opt_dir / "feasible_candidates.csv").exists():
-                        feasible = pd.read_csv(opt_dir / "feasible_candidates.csv").head(2000).to_dict(orient="records")
-                    self.send_json({
-                        "gene": gene,
-                        "validated": False,
-                        "dynamic": True,
-                        "summary": dyn_summary,
-                        "pareto_front": pareto,
-                        "selected_guides": selected,
-                        "feasible_sample": feasible,
-                    })
-                    return
+            if path == "/api/status":
+                from src.dynamic_pipeline import _check_deepcas9_available, _check_bowtie_available, _check_bowtie_executable
                 self.send_json({
-                    "status": "unsupported",
-                    "gene": gene,
-                    "message": f"Gene '{gene}' is not supported or loaded. Validated data is available for: {', '.join(SUPPORTED_GENES)}. Use POST /api/resolve_gene to run dynamic analysis."
-                }, status=404)
+                    "status": "online",
+                    "platform": "CRISPR-Optimization-Dashboard",
+                    "supported_genes": list(SUPPORTED_GENES),
+                    "dynamic_analysis_supported": True,
+                    "resources": {
+                        "deepspcas9_model": _check_deepcas9_available(),
+                        "hg38_bowtie_index": _check_bowtie_available(),
+                        "bowtie_executable": _check_bowtie_executable(),
+                    },
+                })
                 return
 
-        # /api/ncbi_gene_info/<GENE> — quick metadata-only check (no NCBI call if not cached)
-        if path.startswith("/api/ncbi_gene_info/"):
-            gene_symbol = path.split("/")[-1].upper()
-            if not _is_valid_gene_symbol(gene_symbol):
-                self.send_json({"status": "error", "message": "Invalid gene symbol."}, status=400)
+            if path == "/api/genes":
+                self.send_json({
+                    "genes": list(SUPPORTED_GENES),
+                    "dynamic_genes": PipelineController.list_dynamic_genes(),
+                })
                 return
-            cache_dir = PROJECT_ROOT / "data" / "reference_sequences"
-            meta_files = sorted(cache_dir.glob(f"{gene_symbol}_*.metadata.json")) if cache_dir.exists() else []
-            if meta_files:
-                try:
-                    with open(meta_files[-1], "r", encoding="utf-8") as fp:
-                        cached_meta = json.load(fp)
-                    self.send_json({"status": "cached", "gene_symbol": gene_symbol, "metadata": cached_meta})
+
+            if path == "/api/dynamic_genes":
+                self.send_json({
+                    "dynamic_genes": PipelineController.list_dynamic_genes(),
+                })
+                return
+
+            if path == "/api/data":
+                payload = PipelineController.get_full_dashboard_payload()
+                self.send_json(payload)
+                return
+
+            if path.startswith("/api/gene/"):
+                gene = path.split("/")[-1].upper()
+                if gene in SUPPORTED_GENES:
+                    data = {
+                        "gene": gene,
+                        "validated": True,
+                        "overview": PipelineController.get_gene_overview(gene),
+                        "pareto_front": PipelineController.get_pareto_front(gene),
+                        "selected_guides": PipelineController.get_selected_guides(gene),
+                        "feasible_sample": PipelineController.get_feasible_candidates(gene, 2000),
+                        "sensitivity": PipelineController.get_sensitivity_summary(gene),
+                    }
+                    self.send_json(data)
                     return
-                except Exception:
-                    pass
-            self.send_json({"status": "not_cached", "gene_symbol": gene_symbol})
-            return
+                else:
+                    # Check if it was analyzed dynamically
+                    dyn_summary = PipelineController.get_dynamic_gene_summary(gene)
+                    if dyn_summary is not None:
+                        # Load dynamic results
+                        dyn_dir = PROJECT_ROOT / "results" / "dynamic" / gene
+                        opt_dir = dyn_dir / "optimization"
+                        pareto = []
+                        selected = []
+                        feasible = []
+                        if (opt_dir / "pareto_front.csv").exists():
+                            pareto = pd.read_csv(opt_dir / "pareto_front.csv").to_dict(orient="records")
+                        if (opt_dir / "selected_guides.csv").exists():
+                            selected = pd.read_csv(opt_dir / "selected_guides.csv").to_dict(orient="records")
+                        if (opt_dir / "feasible_candidates.csv").exists():
+                            feasible = pd.read_csv(opt_dir / "feasible_candidates.csv").head(2000).to_dict(orient="records")
+                        self.send_json({
+                            "gene": gene,
+                            "validated": False,
+                            "dynamic": True,
+                            "summary": dyn_summary,
+                            "pareto_front": pareto,
+                            "selected_guides": selected,
+                            "feasible_sample": feasible,
+                        })
+                        return
+                    self.send_json({
+                        "status": "unsupported",
+                        "gene": gene,
+                        "message": f"Gene '{gene}' is not supported or loaded. Validated data is available for: {', '.join(SUPPORTED_GENES)}. Use POST /api/resolve_gene to run dynamic analysis."
+                    }, status=404)
+                    return
 
-        # Fallback to static file serving
-        return super().do_GET()
+            # /api/ncbi_gene_info/<GENE> — quick metadata-only check (no NCBI call if not cached)
+            if path.startswith("/api/ncbi_gene_info/"):
+                gene_symbol = path.split("/")[-1].upper()
+                if not _is_valid_gene_symbol(gene_symbol):
+                    self.send_json({"status": "error", "message": "Invalid gene symbol."}, status=400)
+                    return
+                cache_dir = PROJECT_ROOT / "data" / "reference_sequences"
+                meta_files = sorted(cache_dir.glob(f"{gene_symbol}_*.metadata.json")) if cache_dir.exists() else []
+                if meta_files:
+                    try:
+                        with open(meta_files[-1], "r", encoding="utf-8") as fp:
+                            cached_meta = json.load(fp)
+                        self.send_json({"status": "cached", "gene_symbol": gene_symbol, "metadata": cached_meta})
+                        return
+                    except Exception:
+                        pass
+                self.send_json({"status": "not_cached", "gene_symbol": gene_symbol})
+                return
+
+            # Fallback to static file serving
+            return super().do_GET()
+        except Exception as exc:
+            log.error("Internal error in GET %s: %s", self.path, exc, exc_info=True)
+            self.send_json({"status": "error", "message": "An internal error occurred while processing the request."}, status=500)
 
     def send_json(self, data: dict, status: int = 200):
         try:
-            body = json.dumps(data, indent=2, default=str).encode("utf-8")
+            clean_data = _sanitize_for_json(data)
+            body = json.dumps(clean_data, indent=2, default=str).encode("utf-8")
             self.send_response(status)
             self.send_header("Content-Type", "application/json; charset=utf-8")
             self.send_header("Content-Length", str(len(body)))
@@ -432,8 +484,8 @@ def main():
             pass
 
     server_address = (host, port)
-    socketserver.TCPServer.allow_reuse_address = True
-    with socketserver.TCPServer(server_address, DashboardRequestHandler) as httpd:
+    socketserver.ThreadingTCPServer.allow_reuse_address = True
+    with socketserver.ThreadingTCPServer(server_address, DashboardRequestHandler) as httpd:
         try:
             log.info("Server running at http://%s:%d. Press Ctrl+C to stop.", host, port)
             httpd.serve_forever()

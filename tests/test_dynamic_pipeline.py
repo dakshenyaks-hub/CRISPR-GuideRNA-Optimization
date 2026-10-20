@@ -138,6 +138,46 @@ class TestDynamicPipelineModule(unittest.TestCase):
         # Check disclaimer is present
         self.assertIn("disclaimer", api_dict)
 
+    @patch("src.dynamic_pipeline._check_bowtie_available", return_value=False)
+    def test_novel_gene_partial_pipeline_bowtie_unavailable(self, mock_bowtie):
+        """When Bowtie index is absent (e.g. Render environment), partial pipeline succeeds with genuine DeepSpCas9."""
+        sample_seq = (
+            "ATGGCCGAGGCGGCCGCCGAGATCGGCACCCCGCTGCAGCACGAGATCC"
+            "ACGTGTGGGAGCAGCTGCCGGGCGTCACCCACTGGGTCGGCGGCAGCCG"
+            "GAAGCTGGCGCAGCTGGCCG"
+        )
+        res = run_dynamic_pipeline(
+            gene_symbol=self.gene_name,
+            fasta_sequence=sample_seq,
+        )
+        self.assertIsInstance(res, DynamicPipelineResult)
+        stages = {s.stage: s for s in res.stages}
+        self.assertEqual(stages["sequence_resolution"].status, "completed")
+        self.assertEqual(stages["candidate_generation"].status, "completed")
+        self.assertEqual(stages["feature_extraction"].status, "completed")
+        self.assertEqual(stages["deepspcas9_scoring"].status, "completed")
+        self.assertEqual(stages["cfd_scoring"].status, "unavailable")
+        self.assertEqual(stages["optimization"].status, "unavailable")
+
+        api_dict = res.to_api_response()
+        self.assertEqual(api_dict["status"], "success")
+        self.assertTrue(api_dict["partial_analysis"])
+        self.assertFalse(api_dict["complete_optimization"])
+        self.assertEqual(api_dict["stages_available"]["cfd_scoring"], False)
+
+        # Selected guides should be sorted by genuine deep_spcas9_score
+        selected = api_dict["selected_guides"]
+        self.assertGreater(len(selected), 0)
+        for g in selected:
+            self.assertIsNotNone(g["deep_spcas9_score"])
+            # CFD specificity MUST be None / null, never synthetic or fake
+            self.assertIsNone(g["cfd_specificity_score"])
+
+        # RFC 8259 compliance: json.dumps must not emit bare NaN
+        raw_json = json.dumps(api_dict)
+        self.assertNotIn("NaN", raw_json)
+        self.assertIn("null", raw_json)
+
 
 class TestDashboardDynamicIntegration(unittest.TestCase):
     """Tests the dashboard HTTP endpoints with dynamic pipeline integration."""
@@ -218,6 +258,55 @@ class TestDashboardDynamicIntegration(unittest.TestCase):
             self.assertEqual(resp["gene_symbol"], gene)
             self.assertTrue(resp["validated"])
             self.assertEqual(resp["overview"]["total_candidates"], FROZEN_BASELINE[gene]["total_candidates"])
+
+    @patch("src.dynamic_pipeline._check_bowtie_available", return_value=False)
+    def test_post_resolve_gene_render_environment_partial_analysis(self, mock_bowtie):
+        """POST /api/resolve_gene returns 200 with partial analysis when Bowtie index is missing in cloud."""
+        test_seq = "ATGGCCGAGGCGGCCGCCGAGATCGGCACCCCGCTGCAGCACGAGATCCACGTGTGGGAGCAGCTGCCGGGCGTCACCCACTGGGTCGGCGGCAGCCGGAAGCTGGCGCAGCTGGCCG"
+        handler = self._create_mock_handler("POST", "/api/resolve_gene", body={
+            "gene": "RENDER_NOVEL",
+            "fasta_sequence": test_seq,
+        })
+        handler.do_POST()
+
+        resp = handler.get_json_response()
+        self.assertEqual(handler.sent_status, 200)
+        self.assertEqual(resp["gene_symbol"], "RENDER_NOVEL")
+        self.assertTrue(resp["partial_analysis"])
+        self.assertFalse(resp["complete_optimization"])
+        self.assertFalse(resp["stages_available"]["cfd_scoring"])
+        self.assertGreater(len(resp["selected_guides"]), 0)
+
+        # Clean up
+        test_dir = DYNAMIC_RESULTS_DIR / "RENDER_NOVEL"
+        if test_dir.exists():
+            shutil.rmtree(test_dir)
+
+    @patch("src.ncbi_sequence_provider.NCBISequenceProvider.resolve_with_metadata")
+    def test_post_resolve_gene_ncbi_network_error_503(self, mock_fetch):
+        """When NCBI experiences a network error, return clean 503 instead of crashing with 502."""
+        from src.ncbi_sequence_provider import NCBINetworkError
+        mock_fetch.side_effect = NCBINetworkError("NCBI connection timed out")
+        handler = self._create_mock_handler("POST", "/api/resolve_gene", body={"gene": "NET_FAIL_GENE"})
+        handler.do_POST()
+
+        resp = handler.get_json_response()
+        self.assertEqual(handler.sent_status, 503)
+        self.assertEqual(resp["status"], "error")
+        self.assertIn("NCBI", resp["message"])
+
+    @patch("src.ncbi_sequence_provider.NCBISequenceProvider.resolve_with_metadata")
+    def test_post_resolve_gene_ncbi_resolution_error_404(self, mock_fetch):
+        """When NCBI cannot resolve a gene symbol, return clean 404 instead of 500/502."""
+        from src.ncbi_sequence_provider import NCBIResolutionError
+        mock_fetch.side_effect = NCBIResolutionError("Gene symbol 'INVALID_XYZ' not found on NCBI")
+        handler = self._create_mock_handler("POST", "/api/resolve_gene", body={"gene": "INVALID_XYZ"})
+        handler.do_POST()
+
+        resp = handler.get_json_response()
+        self.assertEqual(handler.sent_status, 404)
+        self.assertEqual(resp["status"], "error")
+        self.assertIn("INVALID_XYZ", resp["message"])
 
 
 class TestVEGFADynamicResults(unittest.TestCase):

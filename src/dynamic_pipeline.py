@@ -56,6 +56,23 @@ BOWTIE_INDEX_PREFIX = PROJECT_ROOT / "data" / "hg38_index" / "hg38_index"
 DYNAMIC_RESULTS_DIR = PROJECT_ROOT / "results" / "dynamic"
 
 
+def _sanitize_value(val: Any) -> Any:
+    """Recursively replace NaN and infinite float values with None for RFC 8259 JSON compliance."""
+    if isinstance(val, (float, np.floating)):
+        if np.isnan(val) or np.isinf(val):
+            return None
+        return float(val)
+    elif isinstance(val, (int, np.integer)):
+        return int(val)
+    elif isinstance(val, dict):
+        return {k: _sanitize_value(v) for k, v in val.items()}
+    elif isinstance(val, (list, tuple)):
+        return [_sanitize_value(v) for v in val]
+    elif isinstance(val, np.ndarray):
+        return _sanitize_value(val.tolist())
+    return val
+
+
 @dataclass
 class StageResult:
     """Result from a single pipeline stage."""
@@ -80,14 +97,14 @@ class DynamicPipelineResult:
     selected_guides: Optional[pd.DataFrame] = None
 
     def to_api_response(self) -> Dict[str, Any]:
-        """Convert to a JSON-serializable API response."""
+        """Convert to a JSON-serializable API response with RFC 8259 compliant nulls for uncomputed values."""
         stages_summary = []
         for s in self.stages:
             stages_summary.append({
                 "stage": s.stage,
                 "status": s.status,
                 "message": s.message,
-                "data": s.data,
+                "data": _sanitize_value(s.data),
             })
             if s.error:
                 stages_summary[-1]["error"] = s.error
@@ -106,6 +123,11 @@ class DynamicPipelineResult:
             (s.stage == "cfd_scoring" and s.status == "completed")
             for s in self.stages
         )
+        optimization_complete = any(
+            s.stage == "optimization" and s.status == "completed"
+            for s in self.stages
+        )
+        is_partial = not (deep_spcas9_available and cfd_available and optimization_complete)
 
         # Build genuine overview metrics
         overview = {**self.metadata}
@@ -158,13 +180,15 @@ class DynamicPipelineResult:
             if "guide_id" in self.selected_guides.columns:
                 overview["selected_guide_ids"] = self.selected_guides["guide_id"].tolist()
 
-        # Build response
+        # Build response with partial vs complete differentiation
         response = {
             "status": "success",
             "gene_symbol": self.gene_symbol,
             "input_type": self.input_type,
             "dynamic_scoring_supported": True,
             "validated": False,  # Dynamic results are never "validated" like canonical
+            "partial_analysis": is_partial,
+            "complete_optimization": optimization_complete,
             "scoring_availability": {
                 "deepspcas9": deep_spcas9_available,
                 "bowtie_off_target": bowtie_available,
@@ -173,26 +197,30 @@ class DynamicPipelineResult:
                     s.stage == "feature_extraction" and s.status == "completed"
                     for s in self.stages
                 ),
+                "optimization": optimization_complete,
             },
-            "overview": overview,
-            "meta": overview,
+            "stages_available": {s.stage: (s.status == "completed") for s in self.stages},
+            "overview": _sanitize_value(overview),
+            "meta": _sanitize_value(overview),
             "stages": stages_summary,
         }
 
         # Include results if available (limit for API response size)
         if self.feasible_df is not None and not self.feasible_df.empty:
             sample = self.feasible_df.head(2000)
-            response["feasible_sample"] = sample.to_dict(orient="records")
+            response["feasible_sample"] = _sanitize_value(sample.to_dict(orient="records"))
         else:
             response["feasible_sample"] = []
 
         if self.pareto_df is not None and not self.pareto_df.empty:
-            response["pareto_front"] = self.pareto_df.to_dict(orient="records")
+            response["pareto_front"] = _sanitize_value(self.pareto_df.to_dict(orient="records"))
         else:
             response["pareto_front"] = []
 
         if self.selected_guides is not None and not self.selected_guides.empty:
-            response["selected_guides"] = self.selected_guides.to_dict(orient="records")
+            response["selected_guides"] = _sanitize_value(self.selected_guides.to_dict(orient="records"))
+        elif self.feasible_df is not None and not self.feasible_df.empty:
+            response["selected_guides"] = _sanitize_value(self.feasible_df.head(5).to_dict(orient="records"))
         else:
             response["selected_guides"] = []
 
@@ -444,6 +472,9 @@ def run_dynamic_pipeline(
             ))
 
         except Exception as exc:
+            from src.ncbi_sequence_provider import NCBIResolutionError, NCBINetworkError
+            if isinstance(exc, (NCBIResolutionError, NCBINetworkError)):
+                raise
             result.stages.append(StageResult(
                 stage="sequence_resolution",
                 status="failed",
@@ -545,7 +576,7 @@ def run_dynamic_pipeline(
         if not is_human and organism:
             msg += f" Bowtie off-target unavailable: organism '{organism}' is incompatible with human GRCh38 index."
         elif not bowtie_available:
-            msg += " Bowtie off-target: unavailable (specificity columns are NaN)."
+            msg += " Bowtie off-target: unavailable (specificity columns are uncomputed)."
         elif run_bowtie_in_stage3:
             msg += " Bowtie off-target: available."
         else:
@@ -587,7 +618,7 @@ def run_dynamic_pipeline(
             message=(
                 f"DeepSpCas9 model weights not found at {DEEPCAS9_WEIGHTS}. "
                 f"Run convert_weights.py to generate the weights file. "
-                f"The deep_spcas9_score column will contain NaN values."
+                f"The deep_spcas9_score column will contain uncomputed values."
             ),
         ))
     else:
@@ -652,7 +683,7 @@ def run_dynamic_pipeline(
             status="unavailable",
             message=(
                 "CFD off-target scoring requires Bowtie alignment data, which is unavailable. "
-                "The cfd_off_target_risk and cfd_specificity_score columns will contain NaN values."
+                "The cfd_off_target_risk and cfd_specificity_score columns will contain uncomputed values."
             ),
         ))
     elif not genome_available:
@@ -674,6 +705,14 @@ def run_dynamic_pipeline(
                 message=f"CFD scoring failed: {exc}",
                 error=traceback.format_exc(),
             ))
+
+    # Ensure CFD columns exist in features_df even when CFD scoring was skipped/unavailable
+    if result.features_df is not None:
+        if "cfd_specificity_score" not in result.features_df.columns:
+            result.features_df["cfd_specificity_score"] = np.nan
+        if "cfd_off_target_risk" not in result.features_df.columns:
+            result.features_df["cfd_off_target_risk"] = np.nan
+        result.features_df.to_csv(output_dir / "gRNA_features.csv", index=False)
 
     # ===================================================================
     # Stage 6: Feasibility Filtering + Multi-Objective Optimization
@@ -905,6 +944,11 @@ def _run_optimization(
 
     feasible_df, excluded_df, filter_report = load_and_filter(config)
 
+    if "cfd_specificity_score" not in feasible_df.columns:
+        feasible_df["cfd_specificity_score"] = np.nan
+    if "cfd_off_target_risk" not in feasible_df.columns:
+        feasible_df["cfd_off_target_risk"] = np.nan
+
     if feasible_df.empty:
         result.stages.append(StageResult(
             stage="optimization",
@@ -942,17 +986,24 @@ def _run_optimization(
             spec_axis = feasible_df["norm_specificity"].values
             spec_metric_name = "bowtie_off_target_count (legacy)"
         else:
+            if "deep_spcas9_score" in feasible_df.columns and feasible_df["deep_spcas9_score"].notna().any():
+                feasible_df = feasible_df.sort_values("deep_spcas9_score", ascending=False)
+            result.feasible_df = feasible_df
+            result.selected_guides = feasible_df.head(5).copy()
+            result.pareto_df = pd.DataFrame()
+            feasible_df.to_csv(opt_dir / "feasible_candidates.csv", index=False)
+            result.selected_guides.to_csv(opt_dir / "selected_guides.csv", index=False)
             result.stages.append(StageResult(
                 stage="optimization",
                 status="unavailable",
                 message=(
-                    f"{len(feasible_df)} feasible candidates found, but multi-objective optimization "
-                    f"requires specificity data (CFD or Bowtie off-target counts), which is unavailable."
+                    f"{len(feasible_df)} feasible candidates found and scored with genuine DeepSpCas9, "
+                    f"but multi-objective optimization requires genome-wide specificity data "
+                    f"(CFD or Bowtie off-target counts), which is unavailable in this environment. "
+                    f"Showing candidates ranked by predicted on-target cleavage activity."
                 ),
                 data=filter_report,
             ))
-            result.feasible_df = feasible_df
-            feasible_df.to_csv(opt_dir / "feasible_candidates.csv", index=False)
             return
 
     # Discrete Pareto front calculation (exact Track B logic)

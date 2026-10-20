@@ -364,7 +364,7 @@ class TestLiveHTTPServer(unittest.TestCase):
         import urllib.error
         import urllib.request
         try:
-            urllib.request.urlopen(f"{self.base_url}/api/gene/MYC")
+            urllib.request.urlopen(f"{self.base_url}/api/gene/NONEXISTENT_XYZ_GENE")
             self.fail("Expected HTTPError 404 for unsupported gene")
         except urllib.error.HTTPError as exc:
             self.assertEqual(exc.code, 404)

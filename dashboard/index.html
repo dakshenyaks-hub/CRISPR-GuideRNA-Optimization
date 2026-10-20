@@ -2357,13 +2357,15 @@
                     <div class="ncbi-result-card" id="ncbi-result-card" style="display: none;">
                         <div class="ncbi-result-header">
                             <span class="ncbi-result-gene-name" id="ncbi-res-gene">—</span>
-                            <span class="verified-badge" style="background:#ecfdf5;color:#047857;border-color:#a7f3d0;">✓ NCBI GRCh38 Verified</span>
+                            <span class="verified-badge" id="ncbi-res-badge" style="background:#ecfdf5;color:#047857;border-color:#a7f3d0;">✓ NCBI GRCh38 Verified</span>
                         </div>
                         <div class="ncbi-result-grid" id="ncbi-result-grid"></div>
-                        <div style="font-size:0.78rem;color:var(--text-muted);line-height:1.55;margin-top:0.35rem;" id="ncbi-result-note"></div>
+                        <div id="ncbi-pipeline-badges" style="margin-top: 0.85rem; display: flex; gap: 0.5rem; flex-wrap: wrap;"></div>
+                        <div id="ncbi-status-banner" style="margin-top: 0.85rem;"></div>
+                        <div style="font-size:0.78rem;color:var(--text-muted);line-height:1.55;margin-top:0.45rem;" id="ncbi-result-note"></div>
                         <div style="margin-top: 1rem; display: flex; gap: 0.75rem; flex-wrap: wrap;">
                             <button class="btn-enter-lab" id="btn-load-workflow" onclick="loadResolvedGeneIntoWorkflow()" style="padding: 0.55rem 1.35rem; font-size: 0.92rem;">
-                                <span>🚀 Load Gene into Active Research Workflow &rarr;</span>
+                                <span id="btn-load-workflow-text">🚀 Load Gene into Active Research Workflow &rarr;</span>
                             </button>
                         </div>
                     </div>
@@ -3898,7 +3900,7 @@
                 chip.id = `chip-${currentGene}`;
                 chip.onclick = () => handleGeneChange(currentGene);
                 const meta = getGeneMeta(currentGene);
-                chip.textContent = `${currentGene} (${meta.total_candidates.toLocaleString()})`;
+                chip.textContent = `${currentGene} (${meta.total_candidates != null ? meta.total_candidates.toLocaleString() : '—'})`;
                 chipsContainer.appendChild(chip);
             }
 
@@ -4022,6 +4024,9 @@
             document.getElementById('running-progress-box').style.display = 'none';
 
             const isCompleted = (currentStage < maxUnlockedStage) || (currentStage === 9 && maxUnlockedStage === 9);
+            const isNovelGene = !['TP53', 'HBB', 'EGFR', 'BRCA1'].includes(currentGene);
+            const isCfdAvailable = (meta.max_cfd_risk !== null && meta.max_cfd_risk !== undefined && meta.complete_searches !== null) || (!isNovelGene);
+            const isOptimizationComplete = (meta.complete_optimization === true) || (!isNovelGene);
 
             if (isCompleted) {
                 badgeEl.textContent = 'COMPLETED';
@@ -4241,67 +4246,116 @@
                     iconEl.textContent = '🌐';
                     titleEl.textContent = `Stage 5 — Bowtie + CFD Off-Target Analysis (${currentGene})`;
                     descEl.textContent = 'Genome-wide alignment across GRCh38 reference followed by Cutting Frequency Determination (CFD) matrix rescoring.';
-                    if (!isCompleted) actionBtn.textContent = 'Run Off-Target Analysis';
-                    contentEl.innerHTML = `
-                        <div class="spec-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 1.25rem;">
-                            <div class="spec-card">
-                                <div class="spec-label">Reference Genome</div>
-                                <div class="spec-value">GRCh38</div>
-                                <div class="spec-sub">Human Assembly GRCh38.p14</div>
+                    if (!isCfdAvailable) {
+                        badgeEl.textContent = 'UNAVAILABLE (OPTIONAL RESOURCE)';
+                        badgeEl.className = 'stage-status-badge status-ready';
+                        badgeEl.style.background = '#fffbeb';
+                        badgeEl.style.color = '#b45309';
+                        badgeEl.style.borderColor = '#fde68a';
+                        if (!isCompleted) actionBtn.textContent = 'Resource Information';
+                        contentEl.innerHTML = `
+                            <div class="scientific-note-card" style="border-left: 4px solid var(--amber-accent); background: #fffbeb; margin-bottom: 1.25rem;">
+                                <strong>Genome-wide Specificity Resource Notice:</strong> The GRCh38 human genome Bowtie index (3.4 GB) is not installed in this deployment environment.
+                                <br><br>
+                                Sequence retrieval (NCBI), 5'-NGG protospacer scanning (${fmtVal(meta.total_candidates)} guides), biophysical feature extraction, and DeepSpCas9 on-target cleavage scoring have completed successfully.
+                                CFD genome-wide off-target alignment is skipped to preserve memory stability and avoid timeouts.
                             </div>
-                            <div class="spec-card">
-                                <div class="spec-label">Guides Analyzed</div>
-                                <div class="spec-value">${fmtVal(meta.total_candidates)}</div>
-                                <div class="spec-sub">100% genome-wide coverage</div>
-                            </div>
-                            <div class="spec-card">
-                                <div class="spec-label">Complete Searches</div>
-                                <div class="spec-value" style="color: var(--emerald-accent);">${fmtVal(meta.complete_searches)}</div>
-                                <div class="spec-sub">Exhaustive alignments</div>
-                            </div>
-                            <div class="spec-card">
-                                <div class="spec-label">Censored Searches</div>
-                                <div class="spec-value" style="color: var(--amber-accent);">${fmtVal(meta.censored_searches)}</div>
-                                <div class="spec-sub">Truncated Bowtie threshold</div>
-                            </div>
-                        </div>
-
-                        <!-- Two Sub-Stages (Section 5 Requirement) -->
-                        <div class="substage-container">
-                            <div class="substage-card">
-                                <div class="substage-card-header">
-                                    <div class="substage-title"><span>A. Bowtie Alignment</span></div>
-                                    <span class="step-status-tag tag-completed">Aligned</span>
+                            <div class="spec-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 1.25rem;">
+                                <div class="spec-card">
+                                    <div class="spec-label">Reference Genome</div>
+                                    <div class="spec-value">GRCh38</div>
+                                    <div class="spec-sub">Human Assembly GRCh38.p14</div>
                                 </div>
-                                <p style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5;">
-                                    Exhaustively maps candidate 20-nt protospacers against the human reference genome (GRCh38) with up to 3 mismatches. Intended target locus is verified and excluded from off-target risk tally.
-                                </p>
-                            </div>
-                            <div class="substage-card">
-                                <div class="substage-card-header">
-                                    <div class="substage-title"><span>B. CFD Scoring</span></div>
-                                    <span class="step-status-tag tag-completed">Rescored</span>
+                                <div class="spec-card">
+                                    <div class="spec-label">Bowtie Index File</div>
+                                    <div class="spec-value" style="color: var(--amber-accent);">Missing</div>
+                                    <div class="spec-sub">3.4 GB GRCh38 index absent</div>
                                 </div>
-                                <p style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5;">
-                                    Calculates Cutting Frequency Determination (CFD) penalty matrices accounting for mismatch position, base substitution identities (rN:dN), and non-canonical PAM multipliers (NAG, NGA).
-                                </p>
+                                <div class="spec-card">
+                                    <div class="spec-label">On-Target Activity</div>
+                                    <div class="spec-value" style="color: var(--emerald-accent);">Available</div>
+                                    <div class="spec-sub">DeepSpCas9 model active</div>
+                                </div>
+                                <div class="spec-card">
+                                    <div class="spec-label">Pipeline Mode</div>
+                                    <div class="spec-value" style="color: var(--brand-primary);">Partial Analysis</div>
+                                    <div class="spec-sub">Valid partial results visible</div>
+                                </div>
                             </div>
-                        </div>
+                        `;
+                        populateResultSummary(
+                            'Genome-Wide Specificity Unavailable',
+                            `⚠️ Genome-wide Bowtie index for GRCh38 (3.4 GB) is not installed in the deployment environment.\n✓ On-target cleavage predictions and biophysical properties are preserved without synthetic values.`,
+                            [
+                                { label: 'GRCh38 Bowtie Index', val: 'Not Installed (3.4 GB)' },
+                                { label: 'CFD Off-Target Risk', val: 'Uncomputed' },
+                                { label: 'On-Target Scoring', val: 'DeepSpCas9 Active' },
+                                { label: 'Analysis Status', val: 'Partial Analysis' }
+                            ]
+                        );
+                    } else {
+                        if (!isCompleted) actionBtn.textContent = 'Run Off-Target Analysis';
+                        contentEl.innerHTML = `
+                            <div class="spec-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 1.25rem;">
+                                <div class="spec-card">
+                                    <div class="spec-label">Reference Genome</div>
+                                    <div class="spec-value">GRCh38</div>
+                                    <div class="spec-sub">Human Assembly GRCh38.p14</div>
+                                </div>
+                                <div class="spec-card">
+                                    <div class="spec-label">Guides Analyzed</div>
+                                    <div class="spec-value">${fmtVal(meta.total_candidates)}</div>
+                                    <div class="spec-sub">100% genome-wide coverage</div>
+                                </div>
+                                <div class="spec-card">
+                                    <div class="spec-label">Complete Searches</div>
+                                    <div class="spec-value" style="color: var(--emerald-accent);">${fmtVal(meta.complete_searches)}</div>
+                                    <div class="spec-sub">Exhaustive alignments</div>
+                                </div>
+                                <div class="spec-card">
+                                    <div class="spec-label">Censored Searches</div>
+                                    <div class="spec-value" style="color: var(--amber-accent);">${fmtVal(meta.censored_searches)}</div>
+                                    <div class="spec-sub">Truncated Bowtie threshold</div>
+                                </div>
+                            </div>
 
-                        <div class="scientific-note-card">
-                            <strong>CFD Off-Target Metric:</strong> CFD estimates aggregate off-target cleavage by summing empirical mismatch penalties across all alignment hits: <em>Specificity = 100 / (100 + R_CFD)</em>. Higher score denotes superior genome-wide safety.
-                        </div>
-                    `;
-                    populateResultSummary(
-                        'Off-Target Analysis Complete',
-                        `✓ Bowtie alignment and CFD scoring complete across human genome GRCh38.`,
-                        [
-                            { label: 'Guides Analyzed', val: fmtVal(meta.total_candidates) },
-                            { label: 'Alignment Status', val: 'Bowtie Complete' },
-                            { label: 'Complete Searches', val: fmtVal(meta.complete_searches) },
-                            { label: 'Censored Searches', val: fmtVal(meta.censored_searches) }
-                        ]
-                    );
+                            <!-- Two Sub-Stages (Section 5 Requirement) -->
+                            <div class="substage-container">
+                                <div class="substage-card">
+                                    <div class="substage-card-header">
+                                        <div class="substage-title"><span>A. Bowtie Alignment</span></div>
+                                        <span class="step-status-tag tag-completed">Aligned</span>
+                                    </div>
+                                    <p style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5;">
+                                        Exhaustively maps candidate 20-nt protospacers against the human reference genome (GRCh38) with up to 3 mismatches. Intended target locus is verified and excluded from off-target risk tally.
+                                    </p>
+                                </div>
+                                <div class="substage-card">
+                                    <div class="substage-card-header">
+                                        <div class="substage-title"><span>B. CFD Scoring</span></div>
+                                        <span class="step-status-tag tag-completed">Rescored</span>
+                                    </div>
+                                    <p style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5;">
+                                        Calculates Cutting Frequency Determination (CFD) penalty matrices accounting for mismatch position, base substitution identities (rN:dN), and non-canonical PAM multipliers (NAG, NGA).
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="scientific-note-card">
+                                <strong>CFD Off-Target Metric:</strong> CFD estimates aggregate off-target cleavage by summing empirical mismatch penalties across all alignment hits: <em>Specificity = 100 / (100 + R_CFD)</em>. Higher score denotes superior genome-wide safety.
+                            </div>
+                        `;
+                        populateResultSummary(
+                            'Off-Target Analysis Complete',
+                            `✓ Bowtie alignment and CFD scoring complete across human genome GRCh38.`,
+                            [
+                                { label: 'Guides Analyzed', val: fmtVal(meta.total_candidates) },
+                                { label: 'Alignment Status', val: 'Bowtie Complete' },
+                                { label: 'Complete Searches', val: fmtVal(meta.complete_searches) },
+                                { label: 'Censored Searches', val: fmtVal(meta.censored_searches) }
+                            ]
+                        );
+                    }
                     break;
 
                 case 6:
@@ -4365,116 +4419,199 @@
                     iconEl.textContent = '📐';
                     titleEl.textContent = `Stage 7 — Mathematical Optimization (${currentGene})`;
                     descEl.textContent = 'Multi-objective convex LP relaxation and discrete non-dominated Pareto frontier optimization.';
-                    if (!isCompleted) actionBtn.textContent = 'Run Optimization';
-                    contentEl.innerHTML = `
-                        <div class="core-math-badge">⚡ Core Mathematical Component</div>
-
-                        <div style="background: #ffffff; border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 1.15rem; margin-bottom: 1.25rem;">
-                            <h4 style="font-size: 0.88rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.5rem;">Optimization Objectives</h4>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; font-size: 0.85rem;">
-                                <div><strong>Objective 1:</strong> Maximize normalized DeepSpCas9 activity: $\\max f_1(i)$</div>
-                                <div><strong>Objective 2:</strong> Maximize CFD off-target specificity: $\\max f_2(i)$</div>
+                    if (!isOptimizationComplete) {
+                        badgeEl.textContent = 'UNAVAILABLE (SPECIFICITY REQUIRED)';
+                        badgeEl.className = 'stage-status-badge status-ready';
+                        badgeEl.style.background = '#fffbeb';
+                        badgeEl.style.color = '#b45309';
+                        badgeEl.style.borderColor = '#fde68a';
+                        if (!isCompleted) actionBtn.textContent = 'Multi-Objective Notice';
+                        contentEl.innerHTML = `
+                            <div class="scientific-note-card" style="border-left: 4px solid var(--amber-accent); background: #fffbeb; margin-bottom: 1.25rem;">
+                                <strong>Multi-Objective Pareto Optimization Unavailable:</strong>
+                                Mathematical trade-off optimization requires two competing criteria: on-target cleavage activity (\\(\\max f_1\\)) and genome-wide off-target specificity (\\(\\max f_2\\)).
+                                <br><br>
+                                Because genome-wide specificity is uncomputed (GRCh38 Bowtie index absent in cloud environment), dual-objective Pareto scalarization cannot be solved.
+                                In Stage 9, candidate guides are ranked directly by genuine <strong>DeepSpCas9 on-target cleavage activity</strong> without inventing surrogate or fake specificity values.
                             </div>
-                        </div>
-
-                        <!-- Track A & Track B Cards (Section 5 Requirement) -->
-                        <div class="math-track-grid">
-                            <div class="math-track-card">
-                                <div class="math-track-header">Track A: Convex LP Relaxation</div>
-                                <div class="formula-box" style="margin: 0.5rem 0; font-size: 0.82rem;">
-                                    0 &le; x_i &le; 1 \quad \forall i \in \mathcal{F}
+                            <div class="spec-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+                                <div class="spec-card">
+                                    <div class="spec-label">Objective 1 (On-Target)</div>
+                                    <div class="spec-value" style="color: var(--emerald-accent);">Available</div>
+                                    <div class="spec-sub">DeepSpCas9 scores active</div>
                                 </div>
-                                <p style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5;">
-                                    Continuous linear relaxation of portfolio selection. Total unimodularity of constraints guarantees integral extreme points ($x_i^* \in \{0, 1\}$) and zero duality gap.
-                                </p>
-                            </div>
-
-                            <div class="math-track-card">
-                                <div class="math-track-header">Track B: Discrete Pareto Selection</div>
-                                <div class="formula-box" style="margin: 0.5rem 0; font-size: 0.82rem;">
-                                    x_i \in \{0, 1\} \quad \sum_{i \in \mathcal{F}} x_i = K = 5
+                                <div class="spec-card">
+                                    <div class="spec-label">Objective 2 (Specificity)</div>
+                                    <div class="spec-value" style="color: var(--amber-accent);">Unavailable</div>
+                                    <div class="spec-sub">Bowtie index missing</div>
                                 </div>
-                                <p style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5;">
-                                    Direct non-dominated frontier mapping and balanced scalarization utility ($w_1 = 0.5, w_2 = 0.5$) identifying ${fmtVal(meta.pareto)} verified Pareto-optimal designs.
-                                </p>
+                                <div class="spec-card">
+                                    <div class="spec-label">Optimization Mode</div>
+                                    <div class="spec-value" style="color: var(--indigo-accent);">Single Objective</div>
+                                    <div class="spec-sub">Direct on-target ranking</div>
+                                </div>
+                                <div class="spec-card">
+                                    <div class="spec-label">Selected Portfolio</div>
+                                    <div class="spec-value">K = 5</div>
+                                    <div class="spec-sub">Top cleavage candidates</div>
+                                </div>
                             </div>
-                        </div>
+                        `;
+                        populateResultSummary(
+                            'Multi-Objective Optimization Unavailable',
+                            `⚠️ Multi-objective LP relaxation and Pareto selection require both on-target and off-target objectives.\n✓ Displaying single-objective ranking based on genuine DeepSpCas9 activity.`,
+                            [
+                                { label: 'LP Solver Status', val: 'Specificity Required' },
+                                { label: 'Trade-off Frontier', val: 'Unavailable' },
+                                { label: 'Ranking Criterion', val: 'DeepSpCas9 Cleavage' },
+                                { label: 'Concordance Claim', val: 'None (Partial)' }
+                            ]
+                        );
+                    } else {
+                        if (!isCompleted) actionBtn.textContent = 'Run Optimization';
+                        contentEl.innerHTML = `
+                            <div class="core-math-badge">⚡ Core Mathematical Component</div>
 
-                        <div class="spec-grid" style="margin-top: 1rem;">
-                            <div class="spec-card">
-                                <div class="spec-label">Feasible Candidates</div>
-                                <div class="spec-value" style="color: var(--brand-primary);">${fmtVal(meta.feasible)}</div>
-                                <div class="spec-sub">Decision variables</div>
+                            <div style="background: #ffffff; border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 1.15rem; margin-bottom: 1.25rem;">
+                                <h4 style="font-size: 0.88rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.5rem;">Optimization Objectives</h4>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; font-size: 0.85rem;">
+                                    <div><strong>Objective 1:</strong> Maximize normalized DeepSpCas9 activity: $\\max f_1(i)$</div>
+                                    <div><strong>Objective 2:</strong> Maximize CFD off-target specificity: $\\max f_2(i)$</div>
+                                </div>
                             </div>
-                            <div class="spec-card">
-                                <div class="spec-label">LP Solution Status</div>
-                                <div class="spec-value" style="color: var(--emerald-accent);">Optimal</div>
-                                <div class="spec-sub">Convex dual certified</div>
+
+                            <div class="math-track-grid">
+                                <div class="math-track-card">
+                                    <div class="math-track-header">Track A: Convex LP Relaxation</div>
+                                    <div class="formula-box" style="margin: 0.5rem 0; font-size: 0.82rem;">
+                                        0 &le; x_i &le; 1 \quad \forall i \in \mathcal{F}
+                                    </div>
+                                    <p style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5;">
+                                        Continuous linear relaxation of portfolio selection. Total unimodularity of constraints guarantees integral extreme points ($x_i^* \in \{0, 1\}$) and zero duality gap.
+                                    </p>
+                                </div>
+
+                                <div class="math-track-card">
+                                    <div class="math-track-header">Track B: Discrete Pareto Selection</div>
+                                    <div class="formula-box" style="margin: 0.5rem 0; font-size: 0.82rem;">
+                                        x_i \in \{0, 1\} \quad \sum_{i \in \mathcal{F}} x_i = K = 5
+                                    </div>
+                                    <p style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5;">
+                                        Direct non-dominated frontier mapping and balanced scalarization utility ($w_1 = 0.5, w_2 = 0.5$) identifying ${fmtVal(meta.pareto)} verified Pareto-optimal designs.
+                                    </p>
+                                </div>
                             </div>
-                            <div class="spec-card">
-                                <div class="spec-label">Pareto Frontier Size</div>
-                                <div class="spec-value" style="color: var(--indigo-accent);">${fmtVal(meta.pareto)} Designs</div>
-                                <div class="spec-sub">Non-dominated solutions</div>
+
+                            <div class="spec-grid" style="margin-top: 1rem;">
+                                <div class="spec-card">
+                                    <div class="spec-label">Feasible Candidates</div>
+                                    <div class="spec-value" style="color: var(--brand-primary);">${fmtVal(meta.feasible)}</div>
+                                    <div class="spec-sub">Decision variables</div>
+                                </div>
+                                <div class="spec-card">
+                                    <div class="spec-label">LP Solution Status</div>
+                                    <div class="spec-value" style="color: var(--emerald-accent);">Optimal</div>
+                                    <div class="spec-sub">Convex dual certified</div>
+                                </div>
+                                <div class="spec-card">
+                                    <div class="spec-label">Pareto Frontier Size</div>
+                                    <div class="spec-value" style="color: var(--indigo-accent);">${fmtVal(meta.pareto)} Designs</div>
+                                    <div class="spec-sub">Non-dominated solutions</div>
+                                </div>
+                                <div class="spec-card">
+                                    <div class="spec-label">Selection Target</div>
+                                    <div class="spec-value">K = 5</div>
+                                    <div class="spec-sub">Balanced portfolio</div>
+                                </div>
                             </div>
-                            <div class="spec-card">
-                                <div class="spec-label">Selection Target</div>
-                                <div class="spec-value">K = 5</div>
-                                <div class="spec-sub">Balanced portfolio</div>
-                            </div>
-                        </div>
-                    `;
-                    populateResultSummary(
-                        'Optimization Complete',
-                        `✓ Mathematical optimization complete across ${fmtVal(meta.feasible)} feasible candidates.\n✓ Solved Track A convex LP relaxation and Track B discrete Pareto frontier (${fmtVal(meta.pareto)} Pareto designs).`,
-                        [
-                            { label: 'Feasible Candidates', val: fmtVal(meta.feasible) },
-                            { label: 'LP Solver Status', val: 'Optimal (Convex)' },
-                            { label: 'Pareto Optimal Set', val: `${fmtVal(meta.pareto)} Designs` },
-                            { label: 'Portfolio Constraint', val: 'K = 5 Guides' }
-                        ]
-                    );
+                        `;
+                        populateResultSummary(
+                            'Optimization Complete',
+                            `✓ Mathematical optimization complete across ${fmtVal(meta.feasible)} feasible candidates.\n✓ Solved Track A convex LP relaxation and Track B discrete Pareto frontier (${fmtVal(meta.pareto)} Pareto designs).`,
+                            [
+                                { label: 'Feasible Candidates', val: fmtVal(meta.feasible) },
+                                { label: 'LP Solver Status', val: 'Optimal (Convex)' },
+                                { label: 'Pareto Optimal Set', val: `${fmtVal(meta.pareto)} Designs` },
+                                { label: 'Portfolio Constraint', val: 'K = 5 Guides' }
+                            ]
+                        );
+                    }
                     break;
 
                 case 8:
                     iconEl.textContent = '📈';
                     titleEl.textContent = `Stage 8 — Pareto Frontier Analysis (${currentGene})`;
                     descEl.textContent = 'Pareto-Optimal Guide Selection: explore trade-offs between on-target activity and genome-wide CFD specificity.';
-                    if (!isCompleted) actionBtn.textContent = 'Analyze Pareto Front';
-                    contentEl.innerHTML = `
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
-                            <span style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 600;">
-                                Verified Frontier: <strong>${fmtVal(meta.pareto)} Non-Dominated Solutions</strong>
-                            </span>
-                            <button class="btn-copy-small" onclick="toggleParetoAxisScale()">
-                                ${isNormalizedScale ? 'Switch to Raw Scale' : 'Switch to Normalized Scale'}
-                            </button>
-                        </div>
-                        <div id="stage-pareto-plot" style="width: 100%; height: 400px; border: 1px solid var(--border-light); border-radius: var(--radius-md); background: #ffffff;"></div>
-                        <div class="scientific-note-card" style="margin-top: 1rem;">
-                            <em>“A guide is Pareto-optimal when no other feasible guide is at least as good in both objectives and strictly better in one.”</em>
-                        </div>
-                    `;
-                    setTimeout(renderStageParetoPlot, 50);
-                    populateResultSummary(
-                        'Pareto Frontier Verified',
-                        `✓ Pareto analysis complete. Identified ${fmtVal(meta.pareto)} non-dominated trade-off designs for ${currentGene}.`,
-                        [
-                            { label: 'Feasible Pool', val: fmtVal(meta.feasible) },
-                            { label: 'Pareto Front Size', val: `${fmtVal(meta.pareto)} Guides` },
-                            { label: 'Selected Guides', val: '5 Guides' },
-                            { label: 'Dominance Proof', val: '100% Non-Dominated' }
-                        ]
-                    );
+                    if (!isOptimizationComplete) {
+                        badgeEl.textContent = 'UNAVAILABLE (SPECIFICITY REQUIRED)';
+                        badgeEl.className = 'stage-status-badge status-ready';
+                        badgeEl.style.background = '#fffbeb';
+                        badgeEl.style.color = '#b45309';
+                        badgeEl.style.borderColor = '#fde68a';
+                        contentEl.innerHTML = `
+                            <div class="scientific-note-card" style="border-left: 4px solid var(--amber-accent); background: #fffbeb; margin-bottom: 1.25rem;">
+                                <strong>2D Pareto Trade-off Unavailable:</strong>
+                                A Pareto frontier visualizes the trade-off between conflicting objectives: On-Target Cleavage Activity (X-axis) versus CFD Off-Target Specificity (Y-axis).
+                                Without genome-wide specificity calculations, no trade-off exists and 2D Pareto mapping is skipped to prevent presenting fictitious specificity data.
+                            </div>
+                            <div style="background: var(--bg-body); border: 1px dashed var(--border-medium); border-radius: var(--radius-md); padding: 2rem; text-align: center;">
+                                <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">📊</div>
+                                <div style="font-weight: 600; color: var(--text-main); margin-bottom: 0.25rem;">2D Scatter Plot Inactive</div>
+                                <div style="font-size: 0.85rem; color: var(--text-secondary); max-width: 480px; margin: 0 auto;">
+                                    Genuine on-target cleavage activity is preserved. You can examine cleavage score distribution in the Analysis tab or proceed to Stage 9 for top-ranked guide designs.
+                                </div>
+                            </div>
+                        `;
+                        populateResultSummary(
+                            'Pareto Frontier Analysis Unavailable',
+                            `⚠️ Pareto frontier analysis requires 2 conflicting objectives. Specificity is uncomputed for ${currentGene}.\n✓ Proceed to Stage 9 to view top candidates ranked by genuine DeepSpCas9 activity.`,
+                            [
+                                { label: 'Frontier Status', val: 'Specificity Required' },
+                                { label: 'Feasible Pool', val: fmtVal(meta.feasible) },
+                                { label: 'Ranking Criterion', val: 'DeepSpCas9 Cleavage' },
+                                { label: 'Pipeline Mode', val: 'Partial Analysis' }
+                            ]
+                        );
+                    } else {
+                        if (!isCompleted) actionBtn.textContent = 'Analyze Pareto Front';
+                        contentEl.innerHTML = `
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
+                                <span style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 600;">
+                                    Verified Frontier: <strong>${fmtVal(meta.pareto)} Non-Dominated Solutions</strong>
+                                </span>
+                                <button class="btn-copy-small" onclick="toggleParetoAxisScale()">
+                                    ${isNormalizedScale ? 'Switch to Raw Scale' : 'Switch to Normalized Scale'}
+                                </button>
+                            </div>
+                            <div id="stage-pareto-plot" style="width: 100%; height: 400px; border: 1px solid var(--border-light); border-radius: var(--radius-md); background: #ffffff;"></div>
+                            <div class="scientific-note-card" style="margin-top: 1rem;">
+                                <em>“A guide is Pareto-optimal when no other feasible guide is at least as good in both objectives and strictly better in one.”</em>
+                            </div>
+                        `;
+                        setTimeout(renderStageParetoPlot, 50);
+                        populateResultSummary(
+                            'Pareto Frontier Verified',
+                            `✓ Pareto analysis complete. Identified ${fmtVal(meta.pareto)} non-dominated trade-off designs for ${currentGene}.`,
+                            [
+                                { label: 'Feasible Pool', val: fmtVal(meta.feasible) },
+                                { label: 'Pareto Front Size', val: `${fmtVal(meta.pareto)} Guides` },
+                                { label: 'Selected Guides', val: '5 Guides' },
+                                { label: 'Dominance Proof', val: '100% Non-Dominated' }
+                            ]
+                        );
+                    }
                     break;
 
                 case 9:
                     iconEl.textContent = '⭐';
-                    titleEl.textContent = `Stage 9 — Top-5 Balanced Guide Designs (${currentGene})`;
-                    descEl.textContent = 'Final balanced guide selections under equal-weighted scalarization (w1 = 0.5, w2 = 0.5).';
+                    titleEl.textContent = !isOptimizationComplete ? `Stage 9 — Top Candidate Guides (${currentGene})` : `Stage 9 — Top-5 Balanced Guide Designs (${currentGene})`;
+                    descEl.textContent = !isOptimizationComplete ? 'Guides ranked by genuine DeepSpCas9 on-target cleavage activity (genome-wide specificity uncomputed).' : 'Final balanced guide selections under equal-weighted scalarization (w1 = 0.5, w2 = 0.5).';
                     if (!isCompleted) actionBtn.textContent = 'Inspect Top Candidates';
                     contentEl.innerHTML = `
                         <div style="margin-bottom: 0.75rem; font-size: 0.85rem; color: var(--text-secondary);">
-                            Balanced scalarization utility formulation: <strong>U_i = 0.5 &times; f_1(i) + 0.5 &times; f_2(i)</strong>
+                            ${!isOptimizationComplete
+                                ? '<strong>Ranking Basis:</strong> Genuine DeepSpCas9 on-target cleavage activity score (Specificity is unavailable in cloud environment).'
+                                : 'Balanced scalarization utility formulation: <strong>U_i = 0.5 &times; f_1(i) + 0.5 &times; f_2(i)</strong>'}
                         </div>
                         <div class="table-responsive">
                             <table class="scientific-table">
@@ -4501,7 +4638,7 @@
                             </table>
                         </div>
                         <div class="scientific-note-card">
-                            <strong>Detailed Guide Inspector:</strong> Click on any guide row above to launch the comprehensive Guide Inspector detailing 20-nt base-by-base breakdown, thermodynamic parameters, and genome-wide off-target mismatch counts.
+                            <strong>Detailed Guide Inspector:</strong> Click on any guide row above to launch the comprehensive Guide Inspector detailing 20-nt base-by-base breakdown, thermodynamic parameters, and biophysical properties.
                         </div>
                     `;
                     auxBox.innerHTML = `
@@ -4510,16 +4647,29 @@
                         </button>
                     `;
                     populateTop5Table();
-                    populateResultSummary(
-                        'Top Candidate Selection Complete',
-                        `✓ Top-5 balanced guide designs identified for ${currentGene}.\n✓ Guide IDs and properties match frozen Step 11 research baseline with 100% fidelity.`,
-                        [
-                            { label: 'Target Gene', val: currentGene },
-                            { label: 'Selected Guides', val: '5 Guides' },
-                            { label: 'Pareto Stability', val: '100.0% Robust' },
-                            { label: 'Baseline Concordance', val: 'Exact Match' }
-                        ]
-                    );
+                    if (!isOptimizationComplete) {
+                        populateResultSummary(
+                            'Top Candidates by DeepSpCas9 Activity',
+                            `✓ Top candidates identified for ${currentGene} ranked by genuine DeepSpCas9 cleavage activity.\n⚠️ CFD specificity is uncomputed (Bowtie index absent in cloud). Baseline concordance is not claimed.`,
+                            [
+                                { label: 'Target Gene', val: currentGene },
+                                { label: 'Selected Guides', val: '5 Guides' },
+                                { label: 'Ranking Basis', val: 'DeepSpCas9 Cleavage' },
+                                { label: 'CFD Specificity', val: 'Uncomputed' }
+                            ]
+                        );
+                    } else {
+                        populateResultSummary(
+                            'Top Candidate Selection Complete',
+                            `✓ Top-5 balanced guide designs identified for ${currentGene}.\n✓ Guide IDs and properties match frozen Step 11 research baseline with 100% fidelity.`,
+                            [
+                                { label: 'Target Gene', val: currentGene },
+                                { label: 'Selected Guides', val: '5 Guides' },
+                                { label: 'Pareto Stability', val: '100.0% Robust' },
+                                { label: 'Baseline Concordance', val: 'Exact Match' }
+                            ]
+                        );
+                    }
                     break;
             }
         }
@@ -4624,8 +4774,18 @@
             ensureGeneData(currentGene);
 
             let guides = [];
-            if (dashboardData && dashboardData.genes && dashboardData.genes[currentGene] && dashboardData.genes[currentGene].selected_guides) {
+            if (dashboardData && dashboardData.genes && dashboardData.genes[currentGene] && dashboardData.genes[currentGene].selected_guides && dashboardData.genes[currentGene].selected_guides.length > 0) {
                 guides = dashboardData.genes[currentGene].selected_guides;
+            } else if (dashboardData && dashboardData.genes && dashboardData.genes[currentGene] && dashboardData.genes[currentGene].feasible_sample) {
+                // When multi-objective optimization was skipped due to missing CFD, sort feasible pool by genuine DeepSpCas9 activity
+                guides = [...dashboardData.genes[currentGene].feasible_sample]
+                    .sort((a, b) => (b.deep_spcas9_score || 0) - (a.deep_spcas9_score || 0))
+                    .slice(0, 5);
+            }
+
+            if (guides.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="13" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No candidates available for this stage.</td></tr>';
+                return;
             }
 
             let html = '';
@@ -4633,6 +4793,10 @@
                 const seq = g.guide_rna || 'NNNNNNNNNNNNNNNNNNNN';
                 const pam = g.pam_sequence || 'NGG';
                 const rankClass = idx === 0 ? 'badge-rank-1' : (idx === 1 ? 'badge-rank-2' : (idx === 2 ? 'badge-rank-3' : ''));
+                const deepStr = g.deep_spcas9_score != null ? `${Number(g.deep_spcas9_score).toFixed(2)}%` : '—';
+                const cfdSpecStr = g.cfd_specificity_score != null ? Number(g.cfd_specificity_score).toFixed(4) : '<span style="color: var(--text-muted); font-size: 0.8rem;">Unavailable</span>';
+                const cfdRiskStr = g.cfd_off_target_risk != null ? Number(g.cfd_off_target_risk).toFixed(2) : '—';
+
                 html += `
                     <tr onclick="openGuideInspector('${g.guide_id}')">
                         <td><span class="badge-rank ${rankClass}">${idx + 1}</span></td>
@@ -4642,14 +4806,14 @@
                             <span class="pam-highlight">${pam}</span>
                         </td>
                         <td class="pam-highlight" style="background: transparent; color: var(--text-secondary);">${pam}</td>
-                        <td style="font-family: var(--font-mono);">${g.strand}</td>
-                        <td style="font-family: var(--font-mono);">${g.pam_position}</td>
-                        <td style="font-family: var(--font-mono); font-weight: 700; color: var(--brand-primary);">${(g.deep_spcas9_score || 0).toFixed(2)}%</td>
-                        <td style="font-family: var(--font-mono); font-weight: 700; color: var(--emerald-accent);">${(g.cfd_specificity_score || 0).toFixed(4)}</td>
-                        <td style="font-family: var(--font-mono);">${(g.cfd_off_target_risk || 0).toFixed(2)}</td>
-                        <td style="font-family: var(--font-mono);">${((g.gc_content || 0) * 100).toFixed(1)}%</td>
-                        <td style="font-family: var(--font-mono);">${(g.melting_temp_c || 0).toFixed(1)}</td>
-                        <td style="font-family: var(--font-mono);">${(g.folding_energy_kcal_mol || 0).toFixed(1)}</td>
+                        <td style="font-family: var(--font-mono);">${g.strand || '—'}</td>
+                        <td style="font-family: var(--font-mono);">${g.pam_position != null ? g.pam_position : '—'}</td>
+                        <td style="font-family: var(--font-mono); font-weight: 700; color: var(--brand-primary);">${deepStr}</td>
+                        <td style="font-family: var(--font-mono); font-weight: 700; color: var(--emerald-accent);">${cfdSpecStr}</td>
+                        <td style="font-family: var(--font-mono);">${cfdRiskStr}</td>
+                        <td style="font-family: var(--font-mono);">${g.gc_content != null ? (Number(g.gc_content) * 100).toFixed(1) + '%' : '—'}</td>
+                        <td style="font-family: var(--font-mono);">${g.melting_temp_c != null ? Number(g.melting_temp_c).toFixed(1) : '—'}</td>
+                        <td style="font-family: var(--font-mono);">${g.folding_energy_kcal_mol != null ? Number(g.folding_energy_kcal_mol).toFixed(1) : '—'}</td>
                         <td style="white-space: nowrap;">
                             <button class="btn-copy-small" style="background: #e0f2fe; color: #0284c7; border-color: #bae6fd; margin-right: 0.35rem;" onclick="event.stopPropagation(); openMechanismForGuide('${g.guide_id}')">🧬 Mechanism</button>
                             <button class="btn-copy-small" onclick="event.stopPropagation(); copyText('${seq}')">Copy Sequence</button>
@@ -4838,36 +5002,47 @@
 
             // 4. CFD Distribution
             if (maxUnlockedStage >= 5) {
-                const specs = sample.map(s => s.cfd_specificity_score || 1.0);
-                Plotly.newPlot('plot-cfd-dist', [{
-                    x: specs,
-                    type: 'histogram',
-                    marker: { color: '#059669' },
-                    nbinsx: 35
-                }], {
-                    margin: { t: 20, r: 20, b: 40, l: 50 },
-                    xaxis: { title: 'CFD Specificity Score (100 / (100 + R))', gridcolor: '#e2e8f0' },
-                    yaxis: { title: 'Guide Count', gridcolor: '#e2e8f0' },
-                    plot_bgcolor: '#f8fafc',
-                    paper_bgcolor: '#ffffff'
-                }, { responsive: true, displayModeBar: false });
+                const specs = sample.map(s => s.cfd_specificity_score).filter(v => v !== null && v !== undefined && !Number.isNaN(Number(v)));
+                if (specs.length > 0) {
+                    Plotly.newPlot('plot-cfd-dist', [{
+                        x: specs,
+                        type: 'histogram',
+                        marker: { color: '#059669' },
+                        nbinsx: 35
+                    }], {
+                        margin: { t: 20, r: 20, b: 40, l: 50 },
+                        xaxis: { title: 'CFD Specificity Score (100 / (100 + R))', gridcolor: '#e2e8f0' },
+                        yaxis: { title: 'Guide Count', gridcolor: '#e2e8f0' },
+                        plot_bgcolor: '#f8fafc',
+                        paper_bgcolor: '#ffffff'
+                    }, { responsive: true, displayModeBar: false });
+                } else {
+                    const cfdDiv = document.getElementById('plot-cfd-dist');
+                    if (cfdDiv) cfdDiv.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-secondary);font-size:0.85rem;padding:2rem;text-align:center;">Genome-wide CFD specificity is unavailable for this target (GRCh38 Bowtie index absent).</div>';
+                }
             }
 
             // 5. Activity vs Specificity 2D Scatter (X = Activity, Y = Specificity)
             if (maxUnlockedStage >= 8) {
-                Plotly.newPlot('plot-scatter-2d', [{
-                    x: sample.map(s => s.deep_spcas9_score),
-                    y: sample.map(s => s.cfd_specificity_score),
-                    mode: 'markers',
-                    type: 'scatter',
-                    marker: { color: '#0284c7', size: 5, opacity: 0.4 }
-                }], {
-                    margin: { t: 20, r: 20, b: 40, l: 50 },
-                    xaxis: { title: 'DeepSpCas9 Activity (%) &rarr;', gridcolor: '#e2e8f0' },
-                    yaxis: { title: 'CFD Specificity Score &rarr;', gridcolor: '#e2e8f0' },
-                    plot_bgcolor: '#f8fafc',
-                    paper_bgcolor: '#ffffff'
-                }, { responsive: true, displayModeBar: false });
+                const validPairs = sample.filter(s => s.cfd_specificity_score !== null && s.cfd_specificity_score !== undefined && !Number.isNaN(Number(s.cfd_specificity_score)));
+                if (validPairs.length > 0) {
+                    Plotly.newPlot('plot-scatter-2d', [{
+                        x: validPairs.map(s => s.deep_spcas9_score),
+                        y: validPairs.map(s => s.cfd_specificity_score),
+                        mode: 'markers',
+                        type: 'scatter',
+                        marker: { color: '#0284c7', size: 5, opacity: 0.4 }
+                    }], {
+                        margin: { t: 20, r: 20, b: 40, l: 50 },
+                        xaxis: { title: 'DeepSpCas9 Activity (%) &rarr;', gridcolor: '#e2e8f0' },
+                        yaxis: { title: 'CFD Specificity Score &rarr;', gridcolor: '#e2e8f0' },
+                        plot_bgcolor: '#f8fafc',
+                        paper_bgcolor: '#ffffff'
+                    }, { responsive: true, displayModeBar: false });
+                } else {
+                    const scatterDiv = document.getElementById('plot-scatter-2d');
+                    if (scatterDiv) scatterDiv.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-secondary);font-size:0.85rem;padding:2rem;text-align:center;">2D Trade-off Scatter unavailable: CFD specificity is not computed.</div>';
+                }
             }
 
             // 6. Feasibility Funnel Chart
@@ -4928,7 +5103,10 @@
             let sumPareto = 0;
             let sumSel = 0;
 
-            for (const [gene, meta] of Object.entries(GENE_VERIFIED_META)) {
+            const CANONICAL_BENCHMARK_GENES = ['TP53', 'HBB', 'EGFR', 'BRCA1'];
+            for (const gene of CANONICAL_BENCHMARK_GENES) {
+                const meta = GENE_VERIFIED_META[gene];
+                if (!meta) continue;
                 sumTotal += meta.total_candidates;
                 sumFeas += meta.feasible;
                 sumPareto += meta.pareto;
@@ -5154,29 +5332,34 @@
                 return;
             }
 
+            // Check if CFD specificity is available
+            const hasCfd = candidates.some(c => c.cfd_specificity_score !== null && c.cfd_specificity_score !== undefined);
+
             // Normalization Bounds
             let minAct = Infinity, maxAct = -Infinity;
             let minSpec = Infinity, maxSpec = -Infinity;
 
             candidates.forEach(c => {
                 const act = (c.deep_spcas9_score != null) ? c.deep_spcas9_score : (c.efficiency_score != null ? c.efficiency_score * 100 : 0);
-                const spec = (c.cfd_specificity_score != null) ? c.cfd_specificity_score : (c.specificity_score != null ? c.specificity_score : 0);
                 if (act < minAct) minAct = act;
                 if (act > maxAct) maxAct = act;
-                if (spec < minSpec) minSpec = spec;
-                if (spec > maxSpec) maxSpec = spec;
+                if (hasCfd) {
+                    const spec = (c.cfd_specificity_score != null) ? c.cfd_specificity_score : (c.specificity_score != null ? c.specificity_score : 0);
+                    if (spec < minSpec) minSpec = spec;
+                    if (spec > maxSpec) maxSpec = spec;
+                }
             });
 
             const actRange = (maxAct > minAct) ? (maxAct - minAct) : 1.0;
-            const specRange = (maxSpec > minSpec) ? (maxSpec - minSpec) : 1.0;
+            const specRange = (hasCfd && maxSpec > minSpec) ? (maxSpec - minSpec) : 1.0;
 
             // Recalculate utility scores for all feasible candidates
             const scoredCandidates = candidates.map(c => {
                 const rawAct = (c.deep_spcas9_score != null) ? c.deep_spcas9_score : (c.efficiency_score != null ? c.efficiency_score * 100 : 0);
-                const rawSpec = (c.cfd_specificity_score != null) ? c.cfd_specificity_score : (c.specificity_score != null ? c.specificity_score : 0);
+                const rawSpec = hasCfd ? ((c.cfd_specificity_score != null) ? c.cfd_specificity_score : (c.specificity_score != null ? c.specificity_score : 0)) : null;
                 const f1 = (c.norm_activity != null) ? c.norm_activity : ((rawAct - minAct) / actRange);
-                const f2 = (c.norm_cfd_specificity != null) ? c.norm_cfd_specificity : ((rawSpec - minSpec) / specRange);
-                const utility = optLabState.w1 * f1 + optLabState.w2 * f2;
+                const f2 = hasCfd ? ((c.norm_cfd_specificity != null) ? c.norm_cfd_specificity : ((rawSpec - minSpec) / specRange)) : 0;
+                const utility = hasCfd ? (optLabState.w1 * f1 + optLabState.w2 * f2) : f1;
 
                 return {
                     ...c,
@@ -5192,7 +5375,7 @@
             // Rank descending by objective utility
             scoredCandidates.sort((a, b) => {
                 if (Math.abs(b.utility - a.utility) > 1e-6) return b.utility - a.utility;
-                if (Math.abs(b.f2 - a.f2) > 1e-6) return b.f2 - a.f2;
+                if (hasCfd && Math.abs(b.f2 - a.f2) > 1e-6) return b.f2 - a.f2;
                 return b.f1 - a.f1;
             });
 
@@ -5238,11 +5421,11 @@
                                     <span class="pam-highlight">${pamSeq}</span>
                                 </span>
                             </td>
-                            <td style="font-family: var(--font-mono);">${guide.rawAct.toFixed(2)}</td>
-                            <td style="font-family: var(--font-mono);">${guide.rawSpec.toFixed(4)}</td>
-                            <td style="font-family: var(--font-mono); color: #0284c7;">${guide.f1.toFixed(3)}</td>
-                            <td style="font-family: var(--font-mono); color: #0d9488;">${guide.f2.toFixed(3)}</td>
-                            <td style="font-family: var(--font-mono); font-weight: 700; color: #4f46e5;">${guide.utility.toFixed(4)}</td>
+                            <td style="font-family: var(--font-mono);">${guide.rawAct != null ? guide.rawAct.toFixed(2) : '—'}</td>
+                            <td style="font-family: var(--font-mono);">${guide.rawSpec != null ? guide.rawSpec.toFixed(4) : '<span style="color: var(--text-muted); font-size: 0.8rem;">Unavailable</span>'}</td>
+                            <td style="font-family: var(--font-mono); color: #0284c7;">${guide.f1 != null ? guide.f1.toFixed(3) : '—'}</td>
+                            <td style="font-family: var(--font-mono); color: #0d9488;">${guide.rawSpec != null ? guide.f2.toFixed(3) : '<span style="color: var(--text-muted); font-size: 0.8rem;">—</span>'}</td>
+                            <td style="font-family: var(--font-mono); font-weight: 700; color: #4f46e5;">${guide.utility != null ? guide.utility.toFixed(4) : '—'}</td>
                             <td>${paretoBadge}</td>
                             <td>${deltaBadge}</td>
                         </tr>
@@ -5599,7 +5782,7 @@
         function registerCustomGeneData(data) {
             const gene = data.gene_symbol.toUpperCase();
             const ov = data.overview || data.meta || data;
-            GENE_VERIFIED_META[gene] = {
+            const customMeta = {
                 name: ov.name || ov.description || `${gene}`,
                 accession: ov.accession || ov.genomic_accession || null,
                 assembly: ov.assembly || (ov.organism === 'Homo sapiens' ? 'GRCh38.p14' : null),
@@ -5627,8 +5810,15 @@
                 feasible: ov.feasible ?? (data.feasible_sample ? data.feasible_sample.length : null),
                 excluded: ov.excluded ?? null,
                 pareto: ov.pareto ?? (data.pareto_front ? data.pareto_front.length : null),
-                selected: ov.selected ?? (data.selected_guides ? data.selected_guides.length : null)
+                selected: ov.selected ?? (data.selected_guides ? data.selected_guides.length : null),
+                partial_analysis: data.partial_analysis ?? false,
+                complete_optimization: data.complete_optimization ?? false,
+                stages_available: data.stages_available || ov.stages_available || {}
             };
+
+            if (['TP53', 'HBB', 'EGFR', 'BRCA1'].includes(gene)) {
+                GENE_VERIFIED_META[gene] = { ...GENE_VERIFIED_META[gene], ...customMeta };
+            }
 
             if (!dashboardData) {
                 dashboardData = { genes: {}, supported_genes: ['TP53', 'HBB', 'EGFR', 'BRCA1'] };
@@ -5638,10 +5828,13 @@
             }
 
             dashboardData.genes[gene] = {
-                overview: GENE_VERIFIED_META[gene],
+                overview: customMeta,
                 feasible_sample: data.feasible_sample || [],
                 pareto_front: data.pareto_front || [],
-                selected_guides: data.selected_guides || []
+                selected_guides: data.selected_guides || [],
+                partial_analysis: data.partial_analysis ?? false,
+                complete_optimization: data.complete_optimization ?? false,
+                stages_available: data.stages_available || ov.stages_available || {}
             };
 
             if (!dashboardData.supported_genes.includes(gene)) {
@@ -5702,24 +5895,24 @@
                 if (!data || data.status === 'unsupported' || data.status === 'error') {
                     const msg = (data && data.message)
                         ? data.message
-                        : `Dynamic scoring is not supported for novel gene '${gene}'. Validated DeepSpCas9 activity and CFD off-target predictions are currently available for precomputed research genes (TP53, HBB, EGFR, BRCA1).`;
+                        : `Dynamic analysis could not be completed for gene '${gene}'. Validated data is available for: TP53, HBB, EGFR, BRCA1.`;
                     if (errorMsg) errorMsg.textContent = msg;
                     errorCard.style.display = 'block';
-                    showToast(`Notice: Dynamic scoring for ${gene} is not supported.`);
+                    showToast(`Notice: Analysis for ${gene} was not completed.`);
                     return;
                 }
 
                 _lastResolvedData = data;
                 registerCustomGeneData(data);
                 renderNcbiResult(data);
-                showToast(`✓ ${gene} retrieved`);
+                showToast(`✓ ${gene} retrieved (${data.partial_analysis ? 'Partial Pipeline Analysis' : 'Optimization Ready'})`);
 
             } catch (err) {
                 console.warn('Gene lookup notification:', err);
-                const msg = `Dynamic scoring is not supported for novel gene '${gene}'. Validated DeepSpCas9 activity and CFD off-target predictions are currently available for precomputed research genes (TP53, HBB, EGFR, BRCA1).`;
+                const msg = `Unable to retrieve or analyze gene '${gene}': ${err && err.message ? err.message : 'Network error or service unavailable'}.`;
                 if (errorMsg) errorMsg.textContent = msg;
                 errorCard.style.display = 'block';
-                showToast(`Notice: Dynamic scoring for ${gene} is not supported.`);
+                showToast(`Notice: Gene analysis for ${gene} encountered an issue.`);
             } finally {
                 _ncbiPending = false;
                 btn.disabled = false;
@@ -5737,6 +5930,23 @@
             errorCard.style.display = 'none';
 
             document.getElementById('ncbi-res-gene').textContent = data.gene_symbol || '—';
+
+            const stages = data.stages_available || {};
+            const isPartial = data.partial_analysis === true || !data.complete_optimization;
+            const resBadge = document.getElementById('ncbi-res-badge');
+            if (resBadge) {
+                if (isPartial) {
+                    resBadge.textContent = '⚡ Partial Pipeline Analysis (Sequence & Activity)';
+                    resBadge.style.background = '#fffbeb';
+                    resBadge.style.color = '#b45309';
+                    resBadge.style.borderColor = '#fde68a';
+                } else {
+                    resBadge.textContent = '✓ Complete Multi-Objective Optimization';
+                    resBadge.style.background = '#ecfdf5';
+                    resBadge.style.color = '#047857';
+                    resBadge.style.borderColor = '#a7f3d0';
+                }
+            }
 
             const grid = document.getElementById('ncbi-result-grid');
             const ov = data.overview || data.meta || data;
@@ -5763,6 +5973,46 @@
                     <div class="ncbi-result-value">${item.value}</div>
                 </div>
             `).join('');
+
+            // Render stage capability badges
+            const badgesBox = document.getElementById('ncbi-pipeline-badges');
+            if (badgesBox) {
+                const seqBadge = '<span class="status-badge-verified" style="padding:0.2rem 0.5rem;font-size:0.75rem;">✓ Sequence Retrieval</span>';
+                const pamBadge = '<span class="status-badge-verified" style="padding:0.2rem 0.5rem;font-size:0.75rem;">✓ 5\'-NGG PAM Scan</span>';
+                const featBadge = '<span class="status-badge-verified" style="padding:0.2rem 0.5rem;font-size:0.75rem;">✓ Biophysical Features</span>';
+                const deepBadge = stages.deepspcas9_scoring !== false
+                    ? '<span class="status-badge-verified" style="padding:0.2rem 0.5rem;font-size:0.75rem;">✓ DeepSpCas9 Activity</span>'
+                    : '<span style="background:#f1f5f9;color:#64748b;padding:0.2rem 0.5rem;font-size:0.75rem;border-radius:4px;">○ DeepSpCas9 (Fallback)</span>';
+                const cfdBadge = stages.cfd_scoring === true
+                    ? '<span class="status-badge-verified" style="padding:0.2rem 0.5rem;font-size:0.75rem;">✓ CFD Specificity</span>'
+                    : '<span style="background:#fffbeb;color:#b45309;border:1px solid #fde68a;padding:0.2rem 0.5rem;font-size:0.75rem;border-radius:4px;">⚠️ Specificity (Bowtie Index Absent)</span>';
+                const optBadge = stages.optimization === true
+                    ? '<span class="status-badge-verified" style="padding:0.2rem 0.5rem;font-size:0.75rem;">✓ Pareto Optimization</span>'
+                    : '<span style="background:#fffbeb;color:#b45309;border:1px solid #fde68a;padding:0.2rem 0.5rem;font-size:0.75rem;border-radius:4px;">⚠️ Multi-Objective Pareto (Requires Specificity)</span>';
+                badgesBox.innerHTML = seqBadge + pamBadge + featBadge + deepBadge + cfdBadge + optBadge;
+            }
+
+            // Render banner explaining partial analysis if specificity is absent
+            const bannerBox = document.getElementById('ncbi-status-banner');
+            if (bannerBox) {
+                if (isPartial) {
+                    bannerBox.innerHTML = `
+                        <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: var(--radius-md); padding: 0.75rem 1rem; font-size: 0.82rem; color: #92400e; line-height: 1.5;">
+                            <strong>⚡ Partial Pipeline Analysis Ready:</strong> Sequence retrieval, gRNA candidate generation, biophysical feature extraction, and DeepSpCas9 on-target cleavage scoring succeeded.
+                            Genome-wide off-target alignment requires the 3.4 GB human GRCh38 Bowtie index which is not installed in the deployment environment. You can explore candidate guides and genuine DeepSpCas9 scores in the workbench below.
+                        </div>
+                    `;
+                } else {
+                    bannerBox.innerHTML = '';
+                }
+            }
+
+            const btnText = document.getElementById('btn-load-workflow-text');
+            if (btnText) {
+                btnText.textContent = isPartial
+                    ? `🔬 Load ${data.gene_symbol} into Research Workbench (Partial Analysis) →`
+                    : `🚀 Load ${data.gene_symbol} into Active Optimization Workflow →`;
+            }
 
             const noteEl = document.getElementById('ncbi-result-note');
             noteEl.textContent = data.note || '';

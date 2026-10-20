@@ -155,7 +155,6 @@ class NCBISequenceProvider:
         self.cache_dir = Path(cache_dir or _DEFAULT_CACHE_DIR).resolve()
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         self.timeout = float(timeout) if timeout is not None else _DEFAULT_TIMEOUT
-        socket.setdefaulttimeout(self.timeout)
 
         Entrez.email = email or _ENTREZ_EMAIL
         Entrez.tool = _ENTREZ_TOOL
@@ -272,7 +271,9 @@ class NCBISequenceProvider:
 
     def _entrez_call(self, func, **kwargs):
         """Wrapper for Entrez calls with error handling and network timeout."""
+        orig_timeout = socket.getdefaulttimeout()
         try:
+            socket.setdefaulttimeout(self.timeout)
             handle = func(**kwargs)
             return handle
         except Exception as exc:
@@ -286,6 +287,8 @@ class NCBISequenceProvider:
                     "connection and try again."
                 ) from exc
             raise
+        finally:
+            socket.setdefaulttimeout(orig_timeout)
 
     def _search_gene(self, gene_symbol: str) -> str:
         """Search NCBI Gene database for a human gene symbol. Returns Gene ID."""
